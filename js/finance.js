@@ -2114,6 +2114,90 @@ class FinanceApp {
     this.closeModal("modalPayDebt");
   }
 
+  // ================= 7.5. BÁO CÁO THUẾ HỘ KINH DOANH (TT 40/2021/TT-BTC) =================
+  renderTaxReportTable() {
+    const tbody = document.getElementById("taxReportTableBody");
+    if (!tbody) return;
+
+    const filterPeriod = document.getElementById("filterTaxPeriod") ? document.getElementById("filterTaxPeriod").value : "all";
+    const now = new Date();
+    const currentYearMonth = now.toISOString().slice(0, 7); // YYYY-MM
+    const currentQuarter = Math.floor(now.getMonth() / 3) + 1;
+    const currentYear = now.getFullYear();
+
+    let filteredOrders = [...this.orders];
+    if (filterPeriod === "current_month") {
+      filteredOrders = filteredOrders.filter(o => o.date && o.date.startsWith(currentYearMonth));
+    } else if (filterPeriod === "current_quarter") {
+      filteredOrders = filteredOrders.filter(o => {
+        if (!o.date) return false;
+        const oMonth = parseInt(o.date.slice(5, 7), 10);
+        const oQuarter = Math.floor((oMonth - 1) / 3) + 1;
+        const oYear = parseInt(o.date.slice(0, 4), 10);
+        return oYear === currentYear && oQuarter === currentQuarter;
+      });
+    }
+
+    // Nhóm doanh thu theo Tháng & Loại kinh doanh
+    const groupMap = {};
+    filteredOrders.forEach(o => {
+      const monthKey = (o.date || "").slice(0, 7) || "Khác";
+      const isWholesale = o.order_type === "wholesale";
+      const key = `${monthKey}_${isWholesale ? "wholesale" : "retail"}`;
+
+      if (!groupMap[key]) {
+        groupMap[key] = {
+          month: monthKey,
+          type: isWholesale ? "Phân phối, bán sỉ hàng chay cho Đại lý & Chùa" : "Bán lẻ thực phẩm chay tại cửa hàng",
+          revenue: 0
+        };
+      }
+      groupMap[key].revenue += Number(o.final_amount || 0);
+    });
+
+    const groups = Object.values(groupMap).sort((a, b) => b.month.localeCompare(a.month));
+
+    let totalRev = 0;
+    let totalVat = 0;
+    let totalTncn = 0;
+    let totalObligation = 0;
+
+    if (groups.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 20px;">Không có dữ liệu doanh thu trong kỳ tính thuế này</td></tr>`;
+    } else {
+      tbody.innerHTML = groups.map((g, idx) => {
+        const vat = Math.round(g.revenue * 0.01); // 1.0% GTGT
+        const tncn = Math.round(g.revenue * 0.005); // 0.5% TNCN
+        const totalTax = vat + tncn; // 1.5%
+
+        totalRev += g.revenue;
+        totalVat += vat;
+        totalTncn += tncn;
+        totalObligation += totalTax;
+
+        return `
+          <tr>
+            <td>${idx + 1}</td>
+            <td><strong style="color: var(--primary);">${g.month}</strong></td>
+            <td>${g.type}</td>
+            <td style="font-weight: 700;">${this.formatVND(g.revenue)}</td>
+            <td><span class="badge" style="background: #fef3c7; color: #b45309; font-weight: 700;">1.5%</span></td>
+            <td style="color: #0284c7; font-weight: 600;">${this.formatVND(vat)}</td>
+            <td style="color: var(--lotus); font-weight: 600;">${this.formatVND(tncn)}</td>
+            <td style="font-weight: 700; color: var(--danger); font-size: 13.5px;">${this.formatVND(totalTax)}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // Cập nhật các KPI thẻ thuế
+    const el = id => document.getElementById(id);
+    if (el("taxTotalRevenue")) el("taxTotalRevenue").textContent = this.formatVND(totalRev);
+    if (el("taxVatAmount")) el("taxVatAmount").textContent = this.formatVND(totalVat);
+    if (el("taxTncnAmount")) el("taxTncnAmount").textContent = this.formatVND(totalTncn);
+    if (el("taxTotalObligation")) el("taxTotalObligation").textContent = this.formatVND(totalObligation);
+  }
+
   // ================= 8. TAB SỔ THU CHI & P&L =================
   renderCashflowTable() {
     const tbody = document.getElementById("transactionsTableBody");
