@@ -34,15 +34,15 @@ const SEED_PRODUCTS = [
     "name": "Cơm trắng 200g",
     "weight": "200g/lon",
     "unit": "Lon",
-    "raw_price": 0,
-    "vat_price": 0,
-    "tax": 0,
-    "cost_price": 0,
-    "retail_suggested": 0,
-    "retail_actual": 0,
-    "wholesale_suggested": 0,
+    "raw_price": 12000.0,
+    "vat_price": 12960.0,
+    "tax": 194.0,
+    "cost_price": 13154.0,
+    "retail_suggested": 17100.0,
+    "retail_actual": 20000.0,
+    "wholesale_suggested": 15785.0,
     "inventory_qty": 55.0,
-    "wholesale_actual": 0,
+    "wholesale_actual": 16000,
     "opening_qty": 50.0,
     "in_qty": 20.0,
     "out_qty": 15.0
@@ -452,15 +452,15 @@ const SEED_PRODUCTS = [
     "name": "Tàu hủ ky xào sả ớt",
     "weight": "300g/khay",
     "unit": "Khay",
-    "raw_price": 0,
-    "vat_price": 0,
-    "tax": 0,
-    "cost_price": 0,
-    "retail_suggested": 0,
-    "retail_actual": 0,
-    "wholesale_suggested": 0,
+    "raw_price": 25000.0,
+    "vat_price": 27000.0,
+    "tax": 405.0,
+    "cost_price": 27405.0,
+    "retail_suggested": 35627.0,
+    "retail_actual": 45000.0,
+    "wholesale_suggested": 32886.0,
     "inventory_qty": 37.0,
-    "wholesale_actual": 0,
+    "wholesale_actual": 33000,
     "opening_qty": 40.0,
     "in_qty": 15.0,
     "out_qty": 18.0
@@ -623,15 +623,15 @@ const SEED_PRODUCTS = [
     "name": "Tàu hủ ky cọng khô loại 1",
     "weight": "Kg",
     "unit": "Kg",
-    "raw_price": 0,
-    "vat_price": 0,
-    "tax": 0,
-    "cost_price": 0,
-    "retail_suggested": 0,
-    "retail_actual": 0,
-    "wholesale_suggested": 0,
+    "raw_price": 120000.0,
+    "vat_price": 129600.0,
+    "tax": 1944.0,
+    "cost_price": 131544.0,
+    "retail_suggested": 171007.0,
+    "retail_actual": 180000.0,
+    "wholesale_suggested": 157853.0,
     "inventory_qty": 32.0,
-    "wholesale_actual": 0,
+    "wholesale_actual": 160000,
     "opening_qty": 30.0,
     "in_qty": 10.0,
     "out_qty": 8.0
@@ -699,15 +699,15 @@ const SEED_PRODUCTS = [
     "name": "Tàu hủ ky lá khô - loại 1",
     "weight": "Kg",
     "unit": "Kg",
-    "raw_price": 0,
-    "vat_price": 0,
-    "tax": 0,
-    "cost_price": 0,
-    "retail_suggested": 0,
-    "retail_actual": 0,
-    "wholesale_suggested": 0,
+    "raw_price": 120000.0,
+    "vat_price": 129600.0,
+    "tax": 1944.0,
+    "cost_price": 131544.0,
+    "retail_suggested": 171007.0,
+    "retail_actual": 180000.0,
+    "wholesale_suggested": 157853.0,
     "inventory_qty": 32.0,
-    "wholesale_actual": 0,
+    "wholesale_actual": 160000,
     "opening_qty": 30.0,
     "in_qty": 10.0,
     "out_qty": 8.0
@@ -1158,9 +1158,35 @@ const DEFAULT_SETTINGS = {
 class FinanceApp {
   constructor() {
     this.products = this.loadStorage("bl_products_v2", SEED_PRODUCTS);
-    // Tự động kiểm tra và nâng cấp dữ liệu kho nếu đang bị gán cứng 1.0
+    // Tự động kiểm tra và nâng cấp dữ liệu kho nếu đang bị gán cứng 1.0 hoặc giá bị 0đ
+    let shouldSyncProducts = false;
     if (this.products.length > 0 && this.products[0].inventory_qty === 1.0) {
       this.products = JSON.parse(JSON.stringify(SEED_PRODUCTS));
+      shouldSyncProducts = true;
+    }
+    this.products.forEach(p => {
+      if (!p.raw_price || p.raw_price === 0) {
+        const seed = SEED_PRODUCTS.find(s => s.id === p.id);
+        if (seed && seed.raw_price > 0) {
+          p.raw_price = seed.raw_price;
+          p.cost_price = seed.cost_price;
+          p.retail_suggested = seed.retail_suggested;
+          p.retail_actual = seed.retail_actual;
+          p.wholesale_suggested = seed.wholesale_suggested;
+          p.wholesale_actual = seed.wholesale_actual;
+          shouldSyncProducts = true;
+        }
+      }
+      if (!p.retail_actual || p.retail_actual === 0) {
+        p.retail_actual = p.raw_price > 0 ? Math.round(p.raw_price * 1.5) : 25000;
+        shouldSyncProducts = true;
+      }
+      if (!p.wholesale_actual || p.wholesale_actual === 0) {
+        p.wholesale_actual = p.raw_price > 0 ? Math.round(p.raw_price * 1.3) : 20000;
+        shouldSyncProducts = true;
+      }
+    });
+    if (shouldSyncProducts) {
       this.saveStorage("bl_products_v2", this.products);
     }
     this.customers = this.loadStorage("bl_customers_v2", SEED_CUSTOMERS);
@@ -1447,6 +1473,27 @@ class FinanceApp {
     }).join("");
   }
 
+  togglePosAddMode(mode) {
+    const btnMenu = document.getElementById("btnModeSelectMenu");
+    const btnCustom = document.getElementById("btnModeCustomDish");
+    const modeMenu = document.getElementById("posModeMenu");
+    const modeCustom = document.getElementById("posModeCustom");
+
+    if (mode === "custom") {
+      if (btnMenu) btnMenu.classList.remove("active");
+      if (btnCustom) btnCustom.classList.add("active");
+      if (modeMenu) modeMenu.style.display = "none";
+      if (modeCustom) modeCustom.style.display = "flex";
+      const nameInput = document.getElementById("posCustomName");
+      if (nameInput) nameInput.focus();
+    } else {
+      if (btnMenu) btnMenu.classList.add("active");
+      if (btnCustom) btnCustom.classList.remove("active");
+      if (modeMenu) modeMenu.style.display = "flex";
+      if (modeCustom) modeCustom.style.display = "none";
+    }
+  }
+
   initPosCart() {
     this.posCart = [];
     const paidInput = document.getElementById("orderPaidAmount");
@@ -1462,12 +1509,19 @@ class FinanceApp {
     if (noteInput) noteInput.value = "";
     const customCust = document.getElementById("orderCustomerCustom");
     if (customCust) customCust.value = "";
+
+    const prodSelect = document.getElementById("posAddProductId");
+    if (prodSelect) prodSelect.value = "";
+    const addQty = document.getElementById("posAddQty");
+    if (addQty) addQty.value = "1";
+
+    this.togglePosAddMode("menu");
     this.renderPosCart();
   }
 
   addToPosCart(productId, qty) {
     if (!productId) {
-      alert("Vui lòng chọn sản phẩm!");
+      alert("Vui lòng chọn một sản phẩm chay từ danh sách menu!");
       return;
     }
     qty = Number(qty) || 1;
@@ -1476,7 +1530,10 @@ class FinanceApp {
 
     const calc = this.calcProductCost(p);
     const orderType = document.getElementById("orderType") ? document.getElementById("orderType").value : "retail";
-    const unitPrice = orderType === "wholesale" ? calc.wholesaleActual : calc.retailActual;
+    let unitPrice = orderType === "wholesale" ? calc.wholesaleActual : calc.retailActual;
+    if (unitPrice === 0) {
+      unitPrice = calc.costPrice > 0 ? Math.round(calc.costPrice * 1.3) : 25000;
+    }
 
     const existingIndex = this.posCart.findIndex(item => item.product_id === productId);
     if (existingIndex >= 0) {
@@ -1500,7 +1557,46 @@ class FinanceApp {
 
     this.renderPosCart();
 
+    // Reset dropdown về trống sau khi thêm để tránh việc ấn nhầm cộng dồn số lượng vào món cũ
+    const prodSelect = document.getElementById("posAddProductId");
+    if (prodSelect) prodSelect.value = "";
     const qtyInput = document.getElementById("posAddQty");
+    if (qtyInput) qtyInput.value = "1";
+  }
+
+  addCustomToPosCart(name, unit, qty, price) {
+    name = (name || "").trim();
+    if (!name) {
+      alert("Vui lòng nhập tên món chay mới!");
+      return;
+    }
+    qty = Number(qty) || 1;
+    price = Number(price) || 0;
+    unit = (unit || "Phần").trim();
+
+    const customId = "CUSTOM-" + Date.now();
+    const estimatedCost = Math.round(price * 0.7);
+
+    this.posCart.push({
+      product_id: customId,
+      product_name: name,
+      unit: unit,
+      qty: qty,
+      price: price,
+      cost: estimatedCost,
+      subtotal: qty * price,
+      subtotal_cost: qty * estimatedCost,
+      profit: (qty * price) - (qty * estimatedCost)
+    });
+
+    this.renderPosCart();
+
+    // Reset inputs
+    const nameInput = document.getElementById("posCustomName");
+    if (nameInput) nameInput.value = "";
+    const priceInput = document.getElementById("posCustomPrice");
+    if (priceInput) priceInput.value = "";
+    const qtyInput = document.getElementById("posCustomQty");
     if (qtyInput) qtyInput.value = "1";
   }
 
@@ -1510,11 +1606,21 @@ class FinanceApp {
   }
 
   updatePosCartItemQty(index, newQty) {
-    newQty = Number(newQty) || 1;
+    newQty = Math.max(1, Number(newQty) || 1);
     if (this.posCart[index]) {
       this.posCart[index].qty = newQty;
       this.posCart[index].subtotal = newQty * this.posCart[index].price;
       this.posCart[index].subtotal_cost = newQty * this.posCart[index].cost;
+      this.posCart[index].profit = this.posCart[index].subtotal - this.posCart[index].subtotal_cost;
+      this.renderPosCart();
+    }
+  }
+
+  updatePosCartItemPrice(index, newPrice) {
+    newPrice = Math.max(0, Number(newPrice) || 0);
+    if (this.posCart[index]) {
+      this.posCart[index].price = newPrice;
+      this.posCart[index].subtotal = this.posCart[index].qty * newPrice;
       this.posCart[index].profit = this.posCart[index].subtotal - this.posCart[index].subtotal_cost;
       this.renderPosCart();
     }
@@ -1532,17 +1638,24 @@ class FinanceApp {
 
     tbody.innerHTML = this.posCart.map((item, idx) => `
       <tr>
-        <td><strong>${item.product_name}</strong></td>
-        <td>${item.unit}</td>
         <td>
+          <strong>${item.product_name}</strong>
+          ${item.product_id.startsWith("CUSTOM-") ? `<span class="badge" style="background:#fef3c7; color:#b45309; font-size: 9px; margin-left: 4px;">Món mới</span>` : ""}
+        </td>
+        <td style="color: var(--text-muted);">${item.unit}</td>
+        <td style="text-align: center;">
           <input type="number" value="${item.qty}" min="1" 
-                 style="width: 60px; padding: 2px 4px; text-align: center; border: 1px solid var(--border-color); border-radius: 4px;"
+                 style="width: 55px; padding: 3px 4px; text-align: center; border: 1px solid var(--border-color); border-radius: 4px; font-weight: 600;"
                  onchange="app.updatePosCartItemQty(${idx}, this.value)">
         </td>
-        <td>${this.formatNumber(item.price)} đ</td>
-        <td style="font-weight: 700; color: var(--primary);">${this.formatVND(item.subtotal)}</td>
         <td style="text-align: right;">
-          <button type="button" class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="app.removePosCartItem(${idx})">✕</button>
+          <input type="number" value="${item.price}" min="0" 
+                 style="width: 100px; padding: 3px 6px; text-align: right; border: 1px solid var(--border-color); border-radius: 4px; font-weight: 700; color: var(--primary);"
+                 onchange="app.updatePosCartItemPrice(${idx}, this.value)">
+        </td>
+        <td style="font-weight: 700; text-align: right; color: var(--text-main);">${this.formatVND(item.subtotal)}</td>
+        <td style="text-align: right;">
+          <button type="button" class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px; color: var(--danger);" onclick="app.removePosCartItem(${idx})">✕</button>
         </td>
       </tr>
     `).join("");
@@ -2623,7 +2736,25 @@ class FinanceApp {
     this.renderAll();
     this.closeModal("modalAddProduct");
 
-    // Tự động chọn món vừa thêm trong giỏ POS nếu đang mở
+    // Nếu modal POS đang mở: Tự động thêm món mới này vào giỏ hàng luôn
+    const createOrderModal = document.getElementById("modalCreateOrder");
+    if (createOrderModal && createOrderModal.classList.contains("active")) {
+      const orderType = document.getElementById("orderType") ? document.getElementById("orderType").value : "retail";
+      const unitPrice = orderType === "wholesale" ? wholesaleActual : retailActual;
+      this.posCart.push({
+        product_id: newId,
+        product_name: newProd.name,
+        unit: newProd.unit,
+        qty: 1,
+        price: unitPrice,
+        cost: costPrice,
+        subtotal: unitPrice,
+        subtotal_cost: costPrice,
+        profit: unitPrice - costPrice
+      });
+      this.renderPosCart();
+    }
+
     const posSelect = document.getElementById("posAddProductId");
     if (posSelect) posSelect.value = newId;
 
@@ -2790,6 +2921,27 @@ class FinanceApp {
         const prodId = document.getElementById("posAddProductId").value;
         const qty = document.getElementById("posAddQty").value;
         this.addToPosCart(prodId, qty);
+      });
+    }
+
+    const btnAddCustom = document.getElementById("btnPosAddCustomToCart");
+    if (btnAddCustom) {
+      btnAddCustom.addEventListener("click", () => {
+        const name = document.getElementById("posCustomName") ? document.getElementById("posCustomName").value : "";
+        const unit = document.getElementById("posCustomUnit") ? document.getElementById("posCustomUnit").value : "Phần";
+        const qty = document.getElementById("posCustomQty") ? document.getElementById("posCustomQty").value : 1;
+        const price = document.getElementById("posCustomPrice") ? document.getElementById("posCustomPrice").value : 0;
+        this.addCustomToPosCart(name, unit, qty, price);
+      });
+    }
+
+    const customPriceInput = document.getElementById("posCustomPrice");
+    if (customPriceInput) {
+      customPriceInput.addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (btnAddCustom) btnAddCustom.click();
+        }
       });
     }
 

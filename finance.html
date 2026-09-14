@@ -594,22 +594,53 @@
         </div>
 
         <!-- Add Item Selector Section -->
-        <div class="pos-item-selector">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <div style="font-weight: 600; font-size: 13px; color: var(--primary);">Chọn món thêm vào đơn:</div>
-            <button type="button" class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px; color: var(--lotus); border-color: var(--lotus);" onclick="app.openModal('modalAddProduct')">✨ + Thêm Món Mới Ngoài Menu</button>
+        <!-- Add Item Selector Section -->
+        <div class="pos-item-selector" style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; gap: 6px;">
+              <button type="button" class="btn btn-secondary btn-sm active" id="btnModeSelectMenu" style="font-size: 11.5px; padding: 4px 10px;" onclick="app.togglePosAddMode('menu')">📋 Chọn Món Từ Menu</button>
+              <button type="button" class="btn btn-secondary btn-sm" id="btnModeCustomDish" style="font-size: 11.5px; padding: 4px 10px; color: var(--lotus); border-color: var(--lotus);" onclick="app.togglePosAddMode('custom')">✍️ Nhập Món Mới / Tự Do</button>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 11px; color: var(--text-muted);" onclick="app.openModal('modalAddProduct')">✨ + Món Vào Menu Gốc</button>
           </div>
-          <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 240px;">
-              <select id="posAddProductId" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+
+          <!-- Mode 1: Chọn món từ menu có sẵn -->
+          <div id="posModeMenu" style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+            <div style="flex: 2; min-width: 260px;">
+              <label style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 2px;">Chọn món chay:</label>
+              <select id="posAddProductId" style="width: 100%; padding: 7px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: white;">
                 <!-- Populated via JS -->
               </select>
             </div>
-            <div style="width: 90px;">
-              <input type="number" id="posAddQty" value="1" min="1" placeholder="Số lượng" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; text-align: center;">
+            <div style="width: 80px;">
+              <label style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 2px;">Số lượng:</label>
+              <input type="number" id="posAddQty" value="1" min="1" style="width: 100%; padding: 7px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; text-align: center;">
             </div>
             <div>
-              <button type="button" class="btn btn-primary" id="btnPosAddToCart">➕ Thêm Món</button>
+              <button type="button" class="btn btn-primary" id="btnPosAddToCart" style="height: 35px;">➕ Thêm Vào Đơn</button>
+            </div>
+          </div>
+
+          <!-- Mode 2: Nhập nhanh món mới / tự do -->
+          <div id="posModeCustom" style="display: none; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+            <div style="flex: 2; min-width: 200px;">
+              <label style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 2px;">Tên món mới / tự chọn:</label>
+              <input type="text" id="posCustomName" placeholder="Ví dụ: Cơm thập cẩm chay, Lẩu nấm..." style="width: 100%; padding: 7px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+            </div>
+            <div style="width: 75px;">
+              <label style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 2px;">ĐVT:</label>
+              <input type="text" id="posCustomUnit" value="Phần" style="width: 100%; padding: 7px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; text-align: center;">
+            </div>
+            <div style="width: 75px;">
+              <label style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 2px;">Số lượng:</label>
+              <input type="number" id="posCustomQty" value="1" min="1" style="width: 100%; padding: 7px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; text-align: center;">
+            </div>
+            <div style="width: 130px;">
+              <label style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 2px;">Đơn giá (VNĐ):</label>
+              <input type="number" id="posCustomPrice" min="0" placeholder="Đơn giá" style="width: 100%; padding: 7px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; font-weight: 700; color: var(--primary);">
+            </div>
+            <div>
+              <button type="button" class="btn btn-primary" id="btnPosAddCustomToCart" style="height: 35px; background: var(--lotus); border-color: var(--lotus);">➕ Thêm Món Này</button>
             </div>
           </div>
         </div>
