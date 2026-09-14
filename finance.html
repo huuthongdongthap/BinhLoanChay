@@ -31,6 +31,7 @@
         <button class="btn btn-secondary" onclick="app.exportExcelCSV('customers')">📥 Xuất Khách Hàng</button>
         <button class="btn btn-secondary" onclick="app.exportExcelCSV('cogs')">📥 Xuất Giá Vốn & Sỉ</button>
         <button class="btn btn-secondary" onclick="app.exportExcelCSV('transactions')">📥 Xuất Thu Chi</button>
+        <button class="btn btn-secondary" style="border-color: #0284c7; color: #0284c7; font-weight: 600;" onclick="app.exportExcelCSV('tax')">📑 Xuất Báo Cáo Thuế HKD</button>
         <button class="btn btn-secondary" onclick="app.exportJSONBackup()">💾 Sao Lưu</button>
         <label class="btn btn-secondary" style="cursor: pointer; margin-bottom: 0;">
           📤 Khôi Phục
@@ -65,6 +66,9 @@
       </button>
       <button class="tab-btn" data-tab="cashflow">
         💵 Sổ Thu Chi & Báo Cáo P&L
+      </button>
+      <button class="tab-btn" data-tab="tax">
+        📑 Báo Cáo Doanh Thu & Thuế (HKD)
       </button>
     </nav>
 
@@ -294,7 +298,7 @@
           <table class="custom-table">
             <thead>
               <tr>
-                <th>STT</th>
+                <th>Mã SP</th>
                 <th>Tên Mặt Hàng</th>
                 <th>Nhóm</th>
                 <th>ĐVT</th>
@@ -304,6 +308,7 @@
                 <th style="text-align: center; font-weight: 700;">Tồn Cuối</th>
                 <th>Giá Cost</th>
                 <th>Tổng Vốn Tồn (VND)</th>
+                <th style="text-align: right;">Nhập Nhanh</th>
               </tr>
             </thead>
             <tbody id="xntTableBody">
@@ -454,6 +459,92 @@
               </tr>
             </thead>
             <tbody id="transactionsTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  
+    <!-- ================= TAB 7: BÁO CÁO THUẾ & DOANH THU (HKD) ================= -->
+    <section id="tax" class="tab-pane">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>📑 Báo Cáo Doanh Thu & Kê Khai Thuế Hộ Kinh Doanh</span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-primary" onclick="app.exportExcelCSV('tax')">📥 Tải Bảng Kê Thuế (Excel/CSV)</button>
+            <button class="btn btn-secondary" onclick="window.print()">🖨️ In Báo Cáo Thuế</button>
+          </div>
+        </div>
+
+        <!-- Tax Explainer Banner (Thông tư 40/2021/TT-BTC) -->
+        <div style="background: linear-gradient(135deg, #f0fdf4, #eff6ff); border: 1px solid #93c5fd; border-radius: var(--radius-sm); padding: 14px 18px; margin-bottom: 20px; font-size: 13px;">
+          <div style="font-weight: 700; color: #1e3a8a; margin-bottom: 4px; font-size: 14px;">
+            🏛️ Quy Định Thuế Hộ Kinh Doanh Cá Thể — Ngành Thương Mại / Phân Phối Thực Phẩm (TT 40/2021/TT-BTC & TT 88/2021/TT-BTC):
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 8px;">
+            <div>• Thuế GTGT (Giá trị gia tăng): <strong style="color: var(--primary);">1.0%</strong> trên tổng doanh thu</div>
+            <div>• Thuế TNCN (Thu nhập cá nhân): <strong style="color: var(--lotus);">0.5%</strong> trên tổng doanh thu</div>
+            <div>• 👉 <strong>TỔNG TỶ LỆ THUẾ KHOÁN:</strong> <strong style="color: #b45309; background: #fef3c7; padding: 2px 6px; border-radius: 4px;">1.5% Doanh Thu</strong></div>
+            <div>• Cơ quan quản lý: <strong>Chi Cục Thuế TP. Cao Lãnh</strong></div>
+          </div>
+        </div>
+
+        <!-- Tax Summary KPI Cards -->
+        <div class="kpi-grid" style="margin-bottom: 20px;">
+          <div class="kpi-card" style="border-left: 4px solid var(--primary);">
+            <div class="kpi-title">Tổng Doanh Thu Tính Thuế</div>
+            <div class="kpi-value" id="taxTotalRevenue" style="color: var(--primary);">0 ₫</div>
+            <div class="kpi-subtext" style="color: var(--text-muted);">Bán lẻ quầy + Bán sỉ đại lý</div>
+          </div>
+          <div class="kpi-card" style="border-left: 4px solid #0284c7;">
+            <div class="kpi-title">Thuế GTGT Phải Nộp (1.0%)</div>
+            <div class="kpi-value" id="taxVatAmount" style="color: #0284c7;">0 ₫</div>
+            <div class="kpi-subtext" style="color: var(--text-muted);">1% × Tổng doanh thu</div>
+          </div>
+          <div class="kpi-card" style="border-left: 4px solid var(--lotus);">
+            <div class="kpi-title">Thuế TNCN Phải Nộp (0.5%)</div>
+            <div class="kpi-value" id="taxTncnAmount" style="color: var(--lotus);">0 ₫</div>
+            <div class="kpi-subtext" style="color: var(--text-muted);">0.5% × Tổng doanh thu</div>
+          </div>
+          <div class="kpi-card" style="border-left: 4px solid var(--danger);">
+            <div class="kpi-title">Tổng Nghĩa Vụ Thuế Phải Nộp (1.5%)</div>
+            <div class="kpi-value" id="taxTotalObligation" style="color: var(--danger);">0 ₫</div>
+            <div class="kpi-subtext" style="color: var(--text-muted);">Căn cứ kê khai khoán theo quý</div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <label style="font-size: 13px; font-weight: 600;">Kỳ tính thuế:</label>
+            <select id="filterTaxPeriod" class="select-filter" style="font-weight: 600; color: var(--primary);">
+              <option value="all">Toàn bộ thời gian (Tất cả đơn bán)</option>
+              <option value="current_month">Tháng hiện tại</option>
+              <option value="current_quarter">Quý hiện tại</option>
+            </select>
+          </div>
+          <span style="font-size: 12px; color: var(--text-muted);">Dữ liệu tự động đồng bộ 100% từ các đơn bán hàng POS và hóa đơn</span>
+        </div>
+
+        <!-- Detailed Tax Breakdown Table -->
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>STT</th>
+                <th>Kỳ / Tháng</th>
+                <th>Nhóm Hoạt Động</th>
+                <th>Doanh Thu Tính Thuế (VND)</th>
+                <th>Tỷ Lệ Thuế</th>
+                <th>Thuế GTGT (1%)</th>
+                <th>Thuế TNCN (0.5%)</th>
+                <th style="font-weight: 700; color: var(--danger);">Tổng Thuế Phải Nộp (1.5%)</th>
+              </tr>
+            </thead>
+            <tbody id="taxReportTableBody">
               <!-- Rendered via JS -->
             </tbody>
           </table>
@@ -941,6 +1032,47 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary btn-modal-close">Hủy</button>
           <button type="submit" class="btn btn-lotus">Lưu Mặt Hàng Vào Menu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ================= MODAL: NHẬP KHO NHANH TRỰC TIẾP ================= -->
+  <div id="modalQuickStockIn" class="modal-backdrop">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3>⚡ Nhập Hàng Nhanh Vào Kho</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <form id="formQuickStockIn">
+        <input type="hidden" id="quickStockProdId">
+        <div class="modal-body">
+          <div style="background: #f8fafc; padding: 12px; border-radius: 6px; margin-bottom: 14px;">
+            <div style="font-size: 12px; color: var(--text-muted);">Sản phẩm:</div>
+            <div style="font-size: 15px; font-weight: 700; color: var(--primary);" id="quickStockProdName"></div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+              ĐVT: <span id="quickStockProdUnit"></span> — Tồn hiện tại: <strong id="quickStockProdCurrent" style="color: var(--primary);">0</strong>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label>Số Lượng Nhập Thêm</label>
+              <input type="number" id="quickStockQty" value="20" min="1" required style="font-size: 16px; font-weight: 700; color: var(--primary);">
+            </div>
+            <div class="form-group form-full">
+              <label>Đơn Giá Nhập Gốc (VNĐ)</label>
+              <input type="number" id="quickStockPrice" min="0" required>
+            </div>
+            <div class="form-group form-full" style="flex-direction: row; align-items: center; gap: 8px;">
+              <input type="checkbox" id="quickStockCreateExpense" checked style="width: 18px; height: 18px;">
+              <label for="quickStockCreateExpense" style="margin-bottom: 0; cursor: pointer;">Tự động ghi nhận Chi tiền nhập hàng vào Sổ Quỹ</label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-modal-close">Hủy</button>
+          <button type="submit" class="btn btn-primary">Xác Nhận Nhập Kho</button>
         </div>
       </form>
     </div>

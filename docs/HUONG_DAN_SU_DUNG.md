@@ -132,7 +132,20 @@ Vào tab **`💵 Sổ Thu Chi & Báo Cáo P&L`**:
 
 ---
 
-## 8. Xuất file Excel, In ấn và Sao lưu dữ liệu
+
+---
+
+## 8. Phân hệ 6: Báo Cáo Doanh Thu & Kê Khai Thuế Hộ Kinh Doanh (TT 40/2021/TT-BTC)
+
+Vào tab **`📑 Báo Cáo Doanh Thu & Thuế (HKD)`**:
+- **Căn cứ pháp lý:** Thông tư 40/2021/TT-BTC & Thông tư 88/2021/TT-BTC hướng dẫn chế độ kế toán và thuế cho hộ kinh doanh ngành phân phối, bán buôn bán lẻ thực phẩm:
+  - **Thuế GTGT:** 1.0% trên tổng doanh thu.
+  - **Thuế TNCN:** 0.5% trên tổng doanh thu.
+  - 👉 **Tổng nghĩa vụ thuế:** **1.5% Doanh thu**.
+- **Tự động hóa 100%:** Khi bán đơn hàng (bán lẻ hoặc bán sỉ), doanh thu tự động chảy vào bảng kê theo từng tháng và quý.
+- **Tải bảng kê:** Bấm **`📥 Tải Bảng Kê Thuế (Excel/CSV)`** để nộp báo cáo đối chiếu cho Chi Cục Thuế TP. Cao Lãnh.
+
+## 9. Xuất file Excel, In ấn và Sao lưu dữ liệu
 
 Trên thanh Menu trên cùng có sẵn các nút thao tác nhanh:
 1. **📥 Xuất Đơn Hàng:** Tải file Excel danh sách tất cả các đơn hàng, phân tích doanh thu và lãi gộp.
@@ -146,7 +159,7 @@ Trên thanh Menu trên cùng có sẵn các nút thao tác nhanh:
 
 ---
 
-## 9. Các câu hỏi thường gặp (FAQ)
+## 10. Các câu hỏi thường gặp (FAQ)
 
 **Hỏi: Khi tôi tắt trình duyệt hoặc tắt máy, dữ liệu bán hàng và kho có bị mất không?**  
 *Trả lời:* Hoàn toàn không. Toàn bộ dữ liệu đơn hàng, kho hàng, khách hàng và thu chi được lưu tự động trên bộ nhớ trình duyệt (`localStorage`).

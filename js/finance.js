@@ -22,11 +22,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 25651.0,
     "retail_actual": 30000.0,
     "wholesale_suggested": 23677.92,
-    "inventory_qty": 1.0,
+    "inventory_qty": 55.0,
     "wholesale_actual": 24000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 50.0,
+    "in_qty": 20.0,
+    "out_qty": 15.0
   },
   {
     "id": "BL-002",
@@ -41,11 +41,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 0,
     "retail_actual": 0,
     "wholesale_suggested": 0,
-    "inventory_qty": 1.0,
+    "inventory_qty": 55.0,
     "wholesale_actual": 0,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 50.0,
+    "in_qty": 20.0,
+    "out_qty": 15.0
   },
   {
     "id": "BL-003",
@@ -60,11 +60,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 25651.0,
     "retail_actual": 30000.0,
     "wholesale_suggested": 23677.92,
-    "inventory_qty": 1.0,
+    "inventory_qty": 55.0,
     "wholesale_actual": 24000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 50.0,
+    "in_qty": 20.0,
+    "out_qty": 15.0
   },
   {
     "id": "BL-004",
@@ -79,11 +79,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 35627.0,
     "retail_actual": 50000.0,
     "wholesale_suggested": 32886.0,
-    "inventory_qty": 1.0,
+    "inventory_qty": 55.0,
     "wholesale_actual": 33000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 50.0,
+    "in_qty": 20.0,
+    "out_qty": 15.0
   },
   {
     "id": "BL-005",
@@ -98,11 +98,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 25651.0,
     "retail_actual": 30000.0,
     "wholesale_suggested": 23677.92,
-    "inventory_qty": 1.0,
+    "inventory_qty": 55.0,
     "wholesale_actual": 24000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 50.0,
+    "in_qty": 20.0,
+    "out_qty": 15.0
   },
   {
     "id": "BL-006",
@@ -117,11 +117,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 48452.0,
     "retail_actual": 0,
     "wholesale_suggested": 44724.96,
-    "inventory_qty": 1.0,
+    "inventory_qty": 55.0,
     "wholesale_actual": 45000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 50.0,
+    "in_qty": 20.0,
+    "out_qty": 15.0
   },
   {
     "id": "BL-007",
@@ -136,11 +136,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 35627.0,
     "retail_actual": 45000.0,
     "wholesale_suggested": 32886.0,
-    "inventory_qty": 1.0,
+    "inventory_qty": 55.0,
     "wholesale_actual": 33000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 50.0,
+    "in_qty": 20.0,
+    "out_qty": 15.0
   },
   {
     "id": "BL-008",
@@ -155,11 +155,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 25651.0,
     "retail_actual": 0,
     "wholesale_suggested": 23677.92,
-    "inventory_qty": 1.0,
+    "inventory_qty": 55.0,
     "wholesale_actual": 24000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 50.0,
+    "in_qty": 20.0,
+    "out_qty": 15.0
   },
   {
     "id": "BL-009",
@@ -174,11 +174,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 25651.0,
     "retail_actual": 0,
     "wholesale_suggested": 23677.92,
-    "inventory_qty": 1.0,
+    "inventory_qty": 55.0,
     "wholesale_actual": 24000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 50.0,
+    "in_qty": 20.0,
+    "out_qty": 15.0
   },
   {
     "id": "BL-010",
@@ -193,11 +193,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 45602.0,
     "retail_actual": 0,
     "wholesale_suggested": 42094.08,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 42000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-011",
@@ -212,11 +212,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 85504.0,
     "retail_actual": 0,
     "wholesale_suggested": 78926.4,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 79000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-012",
@@ -231,11 +231,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 76953.0,
     "retail_actual": 0,
     "wholesale_suggested": 71033.76,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 71000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-013",
@@ -250,11 +250,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 39902.0,
     "retail_actual": 0,
     "wholesale_suggested": 36832.32,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 37000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-014",
@@ -269,11 +269,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 45602.0,
     "retail_actual": 0,
     "wholesale_suggested": 42094.08,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 42000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-015",
@@ -288,11 +288,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 48452.0,
     "retail_actual": 0,
     "wholesale_suggested": 44724.96,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 45000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-016",
@@ -307,11 +307,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 78378.0,
     "retail_actual": 0,
     "wholesale_suggested": 72349.2,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 72000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-017",
@@ -326,11 +326,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 44177.0,
     "retail_actual": 0,
     "wholesale_suggested": 40778.64,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 41000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-018",
@@ -345,11 +345,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 48452.0,
     "retail_actual": 0,
     "wholesale_suggested": 44724.96,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 45000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-019",
@@ -364,11 +364,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 78378.0,
     "retail_actual": 0,
     "wholesale_suggested": 72349.2,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 72000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-020",
@@ -383,11 +383,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 44177.0,
     "retail_actual": 0,
     "wholesale_suggested": 40778.64,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 41000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-021",
@@ -402,11 +402,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 57002.0,
     "retail_actual": 0,
     "wholesale_suggested": 52617.6,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 53000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-022",
@@ -421,11 +421,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 51302.0,
     "retail_actual": 0,
     "wholesale_suggested": 47355.84,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 47000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-023",
@@ -440,11 +440,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 35627.0,
     "retail_actual": 0,
     "wholesale_suggested": 32886.0,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 33000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-024",
@@ -459,11 +459,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 0,
     "retail_actual": 0,
     "wholesale_suggested": 0,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 0,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-025",
@@ -478,11 +478,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 42752.0,
     "retail_actual": 0,
     "wholesale_suggested": 39463.2,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 39000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-026",
@@ -497,11 +497,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 42752.0,
     "retail_actual": 0,
     "wholesale_suggested": 39463.2,
-    "inventory_qty": 1.0,
+    "inventory_qty": 37.0,
     "wholesale_actual": 39000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 40.0,
+    "in_qty": 15.0,
+    "out_qty": 18.0
   },
   {
     "id": "BL-027",
@@ -516,11 +516,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 5700.0,
     "retail_actual": 0,
     "wholesale_suggested": 5261.76,
-    "inventory_qty": 1.0,
+    "inventory_qty": 50.0,
     "wholesale_actual": 5000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 60.0,
+    "in_qty": 30.0,
+    "out_qty": 40.0
   },
   {
     "id": "BL-028",
@@ -535,11 +535,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 6413.0,
     "retail_actual": 0,
     "wholesale_suggested": 5919.48,
-    "inventory_qty": 1.0,
+    "inventory_qty": 50.0,
     "wholesale_actual": 6000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 60.0,
+    "in_qty": 30.0,
+    "out_qty": 40.0
   },
   {
     "id": "BL-029",
@@ -554,11 +554,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 35627.0,
     "retail_actual": 0,
     "wholesale_suggested": 32886.0,
-    "inventory_qty": 1.0,
+    "inventory_qty": 50.0,
     "wholesale_actual": 33000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 60.0,
+    "in_qty": 30.0,
+    "out_qty": 40.0
   },
   {
     "id": "BL-030",
@@ -573,11 +573,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 142506.0,
     "retail_actual": 0,
     "wholesale_suggested": 131544.0,
-    "inventory_qty": 1.0,
+    "inventory_qty": 32.0,
     "wholesale_actual": 132000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 30.0,
+    "in_qty": 10.0,
+    "out_qty": 8.0
   },
   {
     "id": "BL-031",
@@ -592,11 +592,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 99754.0,
     "retail_actual": 0,
     "wholesale_suggested": 92080.8,
-    "inventory_qty": 1.0,
+    "inventory_qty": 32.0,
     "wholesale_actual": 92000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 30.0,
+    "in_qty": 10.0,
+    "out_qty": 8.0
   },
   {
     "id": "BL-032",
@@ -611,11 +611,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 49877.0,
     "retail_actual": 0,
     "wholesale_suggested": 46040.4,
-    "inventory_qty": 1.0,
+    "inventory_qty": 32.0,
     "wholesale_actual": 46000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 30.0,
+    "in_qty": 10.0,
+    "out_qty": 8.0
   },
   {
     "id": "BL-033",
@@ -630,11 +630,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 0,
     "retail_actual": 0,
     "wholesale_suggested": 0,
-    "inventory_qty": 1.0,
+    "inventory_qty": 32.0,
     "wholesale_actual": 0,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 30.0,
+    "in_qty": 10.0,
+    "out_qty": 8.0
   },
   {
     "id": "BL-034",
@@ -649,11 +649,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 157612.0,
     "retail_actual": 0,
     "wholesale_suggested": 145487.66,
-    "inventory_qty": 1.0,
+    "inventory_qty": 32.0,
     "wholesale_actual": 145000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 30.0,
+    "in_qty": 10.0,
+    "out_qty": 8.0
   },
   {
     "id": "BL-035",
@@ -668,11 +668,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 99754.0,
     "retail_actual": 0,
     "wholesale_suggested": 92080.8,
-    "inventory_qty": 1.0,
+    "inventory_qty": 32.0,
     "wholesale_actual": 92000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 30.0,
+    "in_qty": 10.0,
+    "out_qty": 8.0
   },
   {
     "id": "BL-036",
@@ -687,11 +687,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 42752.0,
     "retail_actual": 0,
     "wholesale_suggested": 39463.2,
-    "inventory_qty": 1.0,
+    "inventory_qty": 32.0,
     "wholesale_actual": 39000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 30.0,
+    "in_qty": 10.0,
+    "out_qty": 8.0
   },
   {
     "id": "BL-037",
@@ -706,11 +706,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 0,
     "retail_actual": 0,
     "wholesale_suggested": 0,
-    "inventory_qty": 1.0,
+    "inventory_qty": 32.0,
     "wholesale_actual": 0,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 30.0,
+    "in_qty": 10.0,
+    "out_qty": 8.0
   },
   {
     "id": "BL-038",
@@ -725,11 +725,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 163882.0,
     "retail_actual": 0,
     "wholesale_suggested": 151275.6,
-    "inventory_qty": 1.0,
+    "inventory_qty": 32.0,
     "wholesale_actual": 151000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 30.0,
+    "in_qty": 10.0,
+    "out_qty": 8.0
   },
   {
     "id": "BL-039",
@@ -744,11 +744,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 99754.0,
     "retail_actual": 0,
     "wholesale_suggested": 92080.8,
-    "inventory_qty": 1.0,
+    "inventory_qty": 32.0,
     "wholesale_actual": 92000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 30.0,
+    "in_qty": 10.0,
+    "out_qty": 8.0
   },
   {
     "id": "BL-040",
@@ -763,11 +763,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 42752.0,
     "retail_actual": 0,
     "wholesale_suggested": 39463.2,
-    "inventory_qty": 1.0,
+    "inventory_qty": 32.0,
     "wholesale_actual": 39000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 30.0,
+    "in_qty": 10.0,
+    "out_qty": 8.0
   },
   {
     "id": "BL-041",
@@ -782,11 +782,11 @@ const SEED_PRODUCTS = [
     "retail_suggested": 64128.0,
     "retail_actual": 0,
     "wholesale_suggested": 59194.8,
-    "inventory_qty": 1.0,
+    "inventory_qty": 32.0,
     "wholesale_actual": 59000,
-    "opening_qty": 1.0,
-    "in_qty": 0,
-    "out_qty": 0
+    "opening_qty": 30.0,
+    "in_qty": 10.0,
+    "out_qty": 8.0
   }
 ];
 const SEED_CUSTOMERS = [
@@ -1158,6 +1158,11 @@ const DEFAULT_SETTINGS = {
 class FinanceApp {
   constructor() {
     this.products = this.loadStorage("bl_products_v2", SEED_PRODUCTS);
+    // Tự động kiểm tra và nâng cấp dữ liệu kho nếu đang bị gán cứng 1.0
+    if (this.products.length > 0 && this.products[0].inventory_qty === 1.0) {
+      this.products = JSON.parse(JSON.stringify(SEED_PRODUCTS));
+      this.saveStorage("bl_products_v2", this.products);
+    }
     this.customers = this.loadStorage("bl_customers_v2", SEED_CUSTOMERS);
     this.orders = this.loadStorage("bl_orders_v2", SEED_ORDERS);
     this.transactions = this.loadStorage("bl_transactions_v2", SEED_TRANSACTIONS);
@@ -1306,6 +1311,7 @@ class FinanceApp {
     this.renderCOGSTable();
     this.renderCustomersTable();
     this.renderCashflowTable();
+    this.renderTaxReportTable();
     this.renderCharts();
     this.populateSelectOptions();
   }
@@ -1741,7 +1747,7 @@ class FinanceApp {
 
       return `
         <tr>
-          <td><span style="color: var(--text-muted); font-size: 11px;">#${idx + 1}</span></td>
+          <td><strong style="color: var(--primary); font-size: 11.5px;">${p.id}</strong></td>
           <td><strong>${p.name}</strong></td>
           <td><span class="badge" style="background:#f1f5f9; color:#475569;">${p.category.replace("SẢN PHẨM ", "")}</span></td>
           <td>${p.unit}</td>
@@ -1751,6 +1757,9 @@ class FinanceApp {
           <td style="text-align: center; font-weight: 700; font-size: 13px; color: var(--primary);">${closing}</td>
           <td style="font-size: 12px; color: var(--text-muted);">${this.formatNumber(calc.costPrice)} đ</td>
           <td style="font-weight: 700; color: var(--accent-gold);">${this.formatVND(stockVal)}</td>
+          <td style="text-align: right; white-space: nowrap;">
+            <button type="button" class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px; color: var(--primary);" onclick="app.openQuickStockIn('${p.id}')">➕ Nhập</button>
+          </td>
         </tr>
       `;
     }).join("");
@@ -2218,6 +2227,20 @@ class FinanceApp {
 `;
       });
       this.downloadFile("Danh_Ba_Khach_Hang_Cong_No.csv", csv);
+        } else if (type === "tax") {
+      csv = `﻿Kỳ/Tháng,Mã Đơn,Ngày Bán,Khách Hàng,Loại Bán Hàng,Doanh Thu Tính Thuế (VND),Thuế GTGT 1% (VND),Thuế TNCN 0.5% (VND),Tổng Thuế Phải Nộp 1.5% (VND)
+`;
+      this.orders.forEach(o => {
+        const rev = Number(o.final_amount || 0);
+        const vat = Math.round(rev * 0.01);
+        const tncn = Math.round(rev * 0.005);
+        const totalTax = vat + tncn;
+        const ym = (o.date || "").slice(0, 7);
+        const typeName = o.order_type === "wholesale" ? "Bán sỉ đại lý (1.5%)" : "Bán lẻ tại quầy (1.5%)";
+        csv += `"${ym}","${o.code}","${o.date}","${o.customer_name}","${typeName}","${rev}","${vat}","${tncn}","${totalTax}"
+`;
+      });
+      this.downloadFile("Bang_Ke_Doanh_Thu_Thue_HKD_Binh_Loan.csv", csv);
     } else if (type === "cogs") {
       csv = `﻿STT,Mã,Tên Sản Phẩm,Nhóm,ĐVT,Đơn Giá Gốc,Giá Cost,Giá Lẻ Niêm Yết,Biên Lãi Lẻ (%),Giá Sỉ Niêm Yết,Biên Lãi Sỉ (%)
 `;
@@ -2498,6 +2521,23 @@ class FinanceApp {
         );
       });
     }
+
+    // Form Quick Stock In
+    const formQuickStock = document.getElementById("formQuickStockIn");
+    if (formQuickStock) {
+      formQuickStock.addEventListener("submit", e => {
+        e.preventDefault();
+        this.saveQuickStockIn({
+          productId: document.getElementById("quickStockProdId").value,
+          qty: document.getElementById("quickStockQty").value,
+          price: document.getElementById("quickStockPrice").value,
+          createExpense: document.getElementById("quickStockCreateExpense").checked
+        });
+      });
+    }
+
+    const filterTax = document.getElementById("filterTaxPeriod");
+    if (filterTax) filterTax.addEventListener("change", () => this.renderTaxReportTable());
 
     // POS Cart Events
     const btnAddToCart = document.getElementById("btnPosAddToCart");
