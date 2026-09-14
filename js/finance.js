@@ -1200,12 +1200,15 @@ class FinanceApp {
     this.cashflowChart = null;
     this.expensePieChart = null;
 
-    this.initEventListeners();
-    this.renderAll();
+    if (typeof document !== "undefined") {
+      this.initEventListeners();
+      this.renderAll();
+    }
   }
 
   loadStorage(key, defaultVal) {
     try {
+      if (typeof localStorage === "undefined") return defaultVal;
       const data = localStorage.getItem(key);
       return data ? JSON.parse(data) : defaultVal;
     } catch (e) {
@@ -1216,6 +1219,7 @@ class FinanceApp {
 
   saveStorage(key, val) {
     try {
+      if (typeof localStorage === "undefined") return;
       localStorage.setItem(key, JSON.stringify(val));
     } catch (e) {
       console.error("Error saving storage:", e);
@@ -1331,6 +1335,7 @@ class FinanceApp {
 
   // ================= 3. RENDER TỔNG THỂ =================
   renderAll() {
+    if (typeof document === "undefined") return;
     this.renderKPIs();
     this.renderOrdersTable();
     this.renderInventoryXNTTable();
@@ -1529,7 +1534,7 @@ class FinanceApp {
     if (!p) return;
 
     const calc = this.calcProductCost(p);
-    const orderType = document.getElementById("orderType") ? document.getElementById("orderType").value : "retail";
+    const orderType = (typeof document !== "undefined" && document.getElementById("orderType")) ? document.getElementById("orderType").value : "retail";
     let unitPrice = orderType === "wholesale" ? calc.wholesaleActual : calc.retailActual;
     if (unitPrice === 0) {
       unitPrice = calc.costPrice > 0 ? Math.round(calc.costPrice * 1.3) : 25000;
@@ -1558,16 +1563,18 @@ class FinanceApp {
     this.renderPosCart();
 
     // Reset dropdown về trống sau khi thêm để tránh việc ấn nhầm cộng dồn số lượng vào món cũ
-    const prodSelect = document.getElementById("posAddProductId");
-    if (prodSelect) prodSelect.value = "";
-    const qtyInput = document.getElementById("posAddQty");
-    if (qtyInput) qtyInput.value = "1";
+    if (typeof document !== "undefined") {
+      const prodSelect = document.getElementById("posAddProductId");
+      if (prodSelect) prodSelect.value = "";
+      const qtyInput = document.getElementById("posAddQty");
+      if (qtyInput) qtyInput.value = "1";
+    }
   }
 
   addCustomToPosCart(name, unit, qty, price) {
     name = (name || "").trim();
     if (!name) {
-      alert("Vui lòng nhập tên món chay mới!");
+      if (typeof alert !== "undefined") alert("Vui lòng nhập tên món chay mới!");
       return;
     }
     qty = Number(qty) || 1;
@@ -1592,12 +1599,14 @@ class FinanceApp {
     this.renderPosCart();
 
     // Reset inputs
-    const nameInput = document.getElementById("posCustomName");
-    if (nameInput) nameInput.value = "";
-    const priceInput = document.getElementById("posCustomPrice");
-    if (priceInput) priceInput.value = "";
-    const qtyInput = document.getElementById("posCustomQty");
-    if (qtyInput) qtyInput.value = "1";
+    if (typeof document !== "undefined") {
+      const nameInput = document.getElementById("posCustomName");
+      if (nameInput) nameInput.value = "";
+      const priceInput = document.getElementById("posCustomPrice");
+      if (priceInput) priceInput.value = "";
+      const qtyInput = document.getElementById("posCustomQty");
+      if (qtyInput) qtyInput.value = "1";
+    }
   }
 
   removePosCartItem(index) {
@@ -1627,6 +1636,7 @@ class FinanceApp {
   }
 
   renderPosCart() {
+    if (typeof document === "undefined") return;
     const tbody = document.getElementById("posCartTableBody");
     if (!tbody) return;
 
@@ -1664,6 +1674,7 @@ class FinanceApp {
   }
 
   updatePosSummary() {
+    if (typeof document === "undefined") return;
     const totalAmount = this.posCart.reduce((sum, item) => sum + item.subtotal, 0);
     const totalCost = this.posCart.reduce((sum, item) => sum + item.subtotal_cost, 0);
     const discount = Number(document.getElementById("orderDiscount") ? document.getElementById("orderDiscount").value : 0) || 0;
@@ -2672,6 +2683,7 @@ class FinanceApp {
 
   // ================= 11. NAVIGATION & MODALS =================
   switchTab(tabId) {
+    if (typeof document === "undefined") return;
     this.currentTab = tabId;
     document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
     document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
@@ -2687,6 +2699,7 @@ class FinanceApp {
   }
 
   openModal(id) {
+    if (typeof document === "undefined") return;
     const m = document.getElementById(id);
     if (m) m.classList.add("active");
   }
@@ -2765,6 +2778,7 @@ class FinanceApp {
   }
 
   closeModal(id) {
+    if (typeof document === "undefined") return;
     const m = document.getElementById(id);
     if (m) m.classList.remove("active");
   }
@@ -3027,6 +3041,20 @@ class FinanceApp {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  window.app = new FinanceApp();
-});
+if (typeof document !== "undefined") {
+  document.addEventListener("DOMContentLoaded", () => {
+    window.app = new FinanceApp();
+  });
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    FinanceApp,
+    SEED_PRODUCTS,
+    SEED_CUSTOMERS,
+    SEED_ORDERS,
+    SEED_TRANSACTIONS,
+    SEED_MOVEMENTS,
+    DEFAULT_SETTINGS
+  };
+}
