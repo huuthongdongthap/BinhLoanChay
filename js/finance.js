@@ -1379,6 +1379,7 @@ class FinanceApp {
     if (!tbody) return;
 
     const search = document.getElementById("searchOrder") ? document.getElementById("searchOrder").value.toLowerCase() : "";
+    const filterPayment = document.getElementById("filterOrderPayment") ? document.getElementById("filterOrderPayment").value : "all";
     let list = [...this.orders].sort((a, b) => new Date(b.date) - new Date(a.date));
 
     if (search) {
@@ -1389,6 +1390,10 @@ class FinanceApp {
       );
     }
 
+    if (filterPayment !== "all") {
+      list = list.filter(o => (o.payment_method || "").includes(filterPayment));
+    }
+
     if (list.length === 0) {
       tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 24px;">Chưa có đơn hàng nào</td></tr>`;
       return;
@@ -1396,8 +1401,15 @@ class FinanceApp {
 
     tbody.innerHTML = list.map((o, idx) => {
       const isWholesale = o.order_type === "wholesale";
-      const isPaid = o.debt_amount === 0;
+      const isPaid = Number(o.debt_amount || 0) === 0;
       const itemsCount = o.items ? o.items.reduce((sum, item) => sum + Number(item.qty || 0), 0) : 0;
+
+      let paymentBadge = `<span class="badge" style="background:#f0fdf4; color:#16a34a; font-size: 10px; border: 1px solid #bbf7d0;">💵 Tiền mặt</span>`;
+      if ((o.payment_method || "").includes("VietQR") || (o.payment_method || "").includes("Chuyển khoản")) {
+        paymentBadge = `<span class="badge" style="background:#eff6ff; color:#2563eb; font-size: 10px; border: 1px solid #bfdbfe;">📲 Chuyển khoản</span>`;
+      } else if ((o.payment_method || "").includes("Công nợ")) {
+        paymentBadge = `<span class="badge" style="background:#fef2f2; color:#dc2626; font-size: 10px; border: 1px solid #fecaca; font-weight: 700;">📝 Ghi nợ công nợ</span>`;
+      }
 
       return `
         <tr>
@@ -1405,7 +1417,7 @@ class FinanceApp {
           <td style="color: var(--text-muted); font-size: 11.5px;">${o.date}</td>
           <td>
             <strong>${o.customer_name}</strong>
-            <div style="font-size: 11px; color: var(--text-muted);">${o.payment_method || "Tiền mặt"}</div>
+            <div style="margin-top: 3px;">${paymentBadge}</div>
           </td>
           <td>
             <span class="badge ${isWholesale ? "badge-donglanh" : "badge-lon"}">
@@ -1437,6 +1449,19 @@ class FinanceApp {
 
   initPosCart() {
     this.posCart = [];
+    const paidInput = document.getElementById("orderPaidAmount");
+    if (paidInput) {
+      paidInput.value = "";
+      paidInput.dataset.touched = "false";
+    }
+    const paymentMethod = document.getElementById("orderPaymentMethod");
+    if (paymentMethod) paymentMethod.value = "Tiền mặt";
+    const discountInput = document.getElementById("orderDiscount");
+    if (discountInput) discountInput.value = "0";
+    const noteInput = document.getElementById("orderNote");
+    if (noteInput) noteInput.value = "";
+    const customCust = document.getElementById("orderCustomerCustom");
+    if (customCust) customCust.value = "";
     this.renderPosCart();
   }
 
@@ -1531,11 +1556,14 @@ class FinanceApp {
     const discount = Number(document.getElementById("orderDiscount") ? document.getElementById("orderDiscount").value : 0) || 0;
     const finalAmount = Math.max(0, totalAmount - discount);
 
+    const methodSelect = document.getElementById("orderPaymentMethod");
+    const isDebtMethod = methodSelect && methodSelect.value === "Công nợ";
+
     const paidInput = document.getElementById("orderPaidAmount");
     if (paidInput && (!paidInput.value || paidInput.dataset.touched !== "true")) {
-      paidInput.value = finalAmount;
+      paidInput.value = isDebtMethod ? 0 : finalAmount;
     }
-    const paidAmount = Number(paidInput ? paidInput.value : finalAmount) || 0;
+    const paidAmount = Number(paidInput ? paidInput.value : (isDebtMethod ? 0 : finalAmount)) || 0;
     const debtAmount = Math.max(0, finalAmount - paidAmount);
 
     const el = id => document.getElementById(id);
@@ -1554,7 +1582,8 @@ class FinanceApp {
 
     const customerId = document.getElementById("orderCustomerId").value;
     const customer = this.customers.find(c => c.id === customerId);
-    const customerName = customer ? customer.name : (document.getElementById("orderCustomerCustom").value || "Khách lẻ tại quầy");
+    const customName = (document.getElementById("orderCustomerCustom") ? document.getElementById("orderCustomerCustom").value.trim() : "");
+    const customerName = customer ? customer.name : (customName || "Khách lẻ tại quầy");
     const orderType = document.getElementById("orderType").value;
     const paymentMethod = document.getElementById("orderPaymentMethod").value;
     const note = document.getElementById("orderNote").value;
@@ -1566,6 +1595,12 @@ class FinanceApp {
     const finalAmount = Math.max(0, totalAmount - discount);
     const paidAmount = Number(document.getElementById("orderPaidAmount").value) || 0;
     const debtAmount = Math.max(0, finalAmount - paidAmount);
+
+    if (debtAmount > 0 && (!customer || customer.id === "KH-004") && !customName) {
+      if (!confirm(`Đơn hàng này có ghi nợ công nợ (${this.formatVND(debtAmount)}). Khuyên dùng nên chọn Khách hàng hoặc nhập Tên khách để quản lý thu nợ. Bạn vẫn muốn tiếp tục ghi nợ cho Khách lẻ?`)) {
+        return;
+      }
+    }
 
     const code = "DH-" + orderDate.replace(/-/g, "") + "-" + String(this.orders.length + 1).padStart(2, "0");
     const newOrder = {
@@ -1619,8 +1654,8 @@ class FinanceApp {
         type: "income",
         category: orderType === "wholesale" ? "Bán sỉ đại lý" : "Bán lẻ tại quầy",
         amount: paidAmount,
-        payment: paymentMethod,
-        note: `Thu tiền đơn hàng ${code} (${customerName})`,
+        payment: paymentMethod === "Công nợ" ? "Tiền mặt" : paymentMethod,
+        note: `Thu tiền đơn hàng ${code} (${customerName})${debtAmount > 0 ? ` [Nợ lại: ${this.formatVND(debtAmount)}]` : ""}`,
         party: customerName
       });
     }
@@ -1629,6 +1664,12 @@ class FinanceApp {
     if (customer) {
       customer.total_spent = Number(customer.total_spent || 0) + finalAmount;
       customer.current_debt = Number(customer.current_debt || 0) + debtAmount;
+    } else {
+      const custDefault = this.customers.find(c => c.id === "KH-004");
+      if (custDefault) {
+        custDefault.total_spent = Number(custDefault.total_spent || 0) + finalAmount;
+        custDefault.current_debt = Number(custDefault.current_debt || 0) + debtAmount;
+      }
     }
 
     this.orders.unshift(newOrder);
@@ -1801,7 +1842,8 @@ class FinanceApp {
       ref: formData.ref || "PNK-" + Date.now().toString().slice(-4)
     });
 
-    if (formData.create_expense) {
+    const isSupplierDebt = (formData.payment || "").includes("Công nợ");
+    if (formData.create_expense && !isSupplierDebt) {
       this.transactions.unshift({
         id: "TXN-" + Date.now(),
         date,
@@ -2096,6 +2138,22 @@ class FinanceApp {
 
     c.current_debt = Math.max(0, Number(c.current_debt || 0) - amount);
 
+    // Đồng bộ cập nhật các đơn hàng còn nợ của khách hàng theo thứ tự FIFO (đơn cũ gạch nợ trước)
+    let remainPayment = amount;
+    const custOrders = this.orders
+      .filter(o => o.customer_id === customerId && Number(o.debt_amount || 0) > 0)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    for (const ord of custOrders) {
+      if (remainPayment <= 0) break;
+      const debt = Number(ord.debt_amount || 0);
+      const toPay = Math.min(remainPayment, debt);
+      ord.paid_amount = Number(ord.paid_amount || 0) + toPay;
+      ord.debt_amount = Math.max(0, debt - toPay);
+      ord.status = ord.debt_amount === 0 ? "completed" : "partial";
+      remainPayment -= toPay;
+    }
+
     this.transactions.unshift({
       id: "TXN-" + Date.now(),
       date: new Date().toISOString().slice(0, 10),
@@ -2107,6 +2165,7 @@ class FinanceApp {
       party: c.name
     });
 
+    this.saveStorage("bl_orders_v2", this.orders);
     this.saveStorage("bl_customers_v2", this.customers);
     this.saveStorage("bl_transactions_v2", this.transactions);
 
@@ -2763,6 +2822,38 @@ class FinanceApp {
       });
     }
 
+    const orderPaymentMethod = document.getElementById("orderPaymentMethod");
+    if (orderPaymentMethod) {
+      orderPaymentMethod.addEventListener("change", () => {
+        const paidInput = document.getElementById("orderPaidAmount");
+        if (orderPaymentMethod.value === "Công nợ") {
+          if (paidInput) {
+            paidInput.value = 0;
+            paidInput.dataset.touched = "true";
+          }
+        } else {
+          if (paidInput) {
+            paidInput.dataset.touched = "false";
+          }
+        }
+        this.updatePosSummary();
+      });
+    }
+
+    const stockInPayment = document.getElementById("stockInPayment");
+    const stockInCreateExpense = document.getElementById("stockInCreateExpense");
+    if (stockInPayment && stockInCreateExpense) {
+      stockInPayment.addEventListener("change", () => {
+        if (stockInPayment.value.includes("Công nợ")) {
+          stockInCreateExpense.checked = false;
+          stockInCreateExpense.disabled = true;
+        } else {
+          stockInCreateExpense.disabled = false;
+          stockInCreateExpense.checked = true;
+        }
+      });
+    }
+
     const btnSubmitOrder = document.getElementById("btnSubmitOrder");
     if (btnSubmitOrder) btnSubmitOrder.addEventListener("click", () => this.saveNewOrder());
 
@@ -2773,6 +2864,7 @@ class FinanceApp {
     };
 
     elBind("searchOrder", "input", () => this.renderOrdersTable());
+    elBind("filterOrderPayment", "change", () => this.renderOrdersTable());
     elBind("searchXnt", "input", () => this.renderInventoryXNTTable());
     elBind("filterXntCat", "change", () => this.renderInventoryXNTTable());
     elBind("searchCogs", "input", () => this.renderCOGSTable());

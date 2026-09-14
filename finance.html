@@ -211,6 +211,12 @@
         <div class="toolbar">
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <input type="text" id="searchOrder" class="search-input" placeholder="Tìm theo mã đơn, tên khách hàng, ghi chú...">
+            <select id="filterOrderPayment" class="select-filter" style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 13px; background: white; color: var(--text-main);">
+              <option value="all">Tất cả hình thức thanh toán</option>
+              <option value="Tiền mặt">💵 Tiền mặt</option>
+              <option value="Chuyển khoản (VietQR)">📲 Chuyển khoản (VietQR)</option>
+              <option value="Công nợ">📝 Công nợ (Gối đầu / Trả sau)</option>
+            </select>
           </div>
           <span style="font-size: 12px; color: var(--text-muted);">Tự động trừ tồn kho, tính lãi gộp và cộng công nợ khách hàng</span>
         </div>
@@ -661,8 +667,9 @@
             <div class="form-group">
               <label>Phương Thức Thanh Toán</label>
               <select id="orderPaymentMethod">
-                <option value="Tiền mặt">Tiền mặt tại quầy</option>
-                <option value="Chuyển khoản (VietQR)">Chuyển khoản ngân hàng (VietQR)</option>
+                <option value="Tiền mặt">💵 Tiền mặt tại quầy</option>
+                <option value="Chuyển khoản (VietQR)">📲 Chuyển khoản ngân hàng (VietQR)</option>
+                <option value="Công nợ">📝 Công nợ (Ghi sổ / Trả sau)</option>
               </select>
             </div>
             <div class="form-group">
@@ -797,10 +804,11 @@
               <label for="stockInCreateExpense" style="margin-bottom: 0; cursor: pointer;">Đồng thời tạo giao dịch Chi Tiền trong Sổ Quỹ Thu Chi</label>
             </div>
             <div class="form-group form-full">
-              <label>Hình Thức Chi Tiền</label>
+              <label>Hình Thức Thanh Toán / Chi Tiền</label>
               <select id="stockInPayment">
-                <option value="Chuyển khoản (VietQR)">Chuyển khoản ngân hàng (VietQR)</option>
-                <option value="Tiền mặt">Tiền mặt</option>
+                <option value="Chuyển khoản (VietQR)">📲 Chuyển khoản ngân hàng (VietQR)</option>
+                <option value="Tiền mặt">💵 Tiền mặt</option>
+                <option value="Công nợ nhà cung cấp">📝 Công nợ nhà cung cấp (Gối đầu / Chưa chi tiền)</option>
               </select>
             </div>
           </div>
