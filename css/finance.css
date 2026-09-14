@@ -659,13 +659,15 @@ body {
 
 /* ================== PRINT SPECIFIC MEDIA ================== */
 @media print {
-  body * {
+  /* Nếu đang mở modal in phiếu bán hàng (modalViewOrder active) */
+  body.printing-receipt * {
     visibility: hidden;
   }
-  #printableReceiptArea, #printableReceiptArea * {
+  body.printing-receipt #printableReceiptArea,
+  body.printing-receipt #printableReceiptArea * {
     visibility: visible;
   }
-  #printableReceiptArea {
+  body.printing-receipt #printableReceiptArea {
     position: absolute;
     left: 0;
     top: 0;

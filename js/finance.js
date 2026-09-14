@@ -1474,6 +1474,9 @@ class FinanceApp {
     }
 
     this.renderPosCart();
+
+    const qtyInput = document.getElementById("posAddQty");
+    if (qtyInput) qtyInput.value = "1";
   }
 
   removePosCartItem(index) {
@@ -1819,6 +1822,69 @@ class FinanceApp {
     this.closeModal("modalStockIn");
   }
 
+  openQuickStockIn(productId) {
+    const p = this.products.find(item => item.id === productId);
+    if (!p) return;
+
+    const el = id => document.getElementById(id);
+    if (el("quickStockProdId")) el("quickStockProdId").value = p.id;
+    if (el("quickStockProdName")) el("quickStockProdName").textContent = p.name;
+    if (el("quickStockProdUnit")) el("quickStockProdUnit").textContent = p.unit;
+    if (el("quickStockProdCurrent")) el("quickStockProdCurrent").textContent = `${p.inventory_qty || 0} ${p.unit}`;
+    if (el("quickStockPrice")) el("quickStockPrice").value = p.raw_price || 0;
+    if (el("quickStockQty")) el("quickStockQty").value = 20;
+
+    this.openModal("modalQuickStockIn");
+  }
+
+  saveQuickStockIn(formData) {
+    const p = this.products.find(item => item.id === formData.productId);
+    if (!p) return;
+
+    const qty = Number(formData.qty) || 0;
+    const price = Number(formData.price) || p.raw_price || 0;
+    const totalCost = qty * price;
+    const date = new Date().toISOString().slice(0, 10);
+
+    p.inventory_qty = Number(p.inventory_qty || 0) + qty;
+    p.in_qty = Number(p.in_qty || 0) + qty;
+
+    this.stockMovements.unshift({
+      id: "MOV-" + Date.now(),
+      date,
+      type: "in",
+      product_id: p.id,
+      product_name: p.name,
+      qty,
+      unit: p.unit,
+      unit_cost: price,
+      total_cost: totalCost,
+      note: `Nhập kho nhanh: ${qty} ${p.unit} ${p.name}`,
+      ref: "PNK-NHANH-" + Date.now().toString().slice(-4)
+    });
+
+    if (formData.createExpense) {
+      this.transactions.unshift({
+        id: "TXN-" + Date.now(),
+        date,
+        type: "expense",
+        category: "Nhập nguyên liệu / Giá vốn",
+        amount: totalCost,
+        payment: "Chuyển khoản (VietQR)",
+        note: `Chi tiền nhập nhanh ${qty} ${p.unit} ${p.name}`,
+        party: "Xưởng Chay Bình Loan"
+      });
+    }
+
+    this.saveStorage("bl_products_v2", this.products);
+    this.saveStorage("bl_movements_v2", this.stockMovements);
+    this.saveStorage("bl_transactions_v2", this.transactions);
+
+    this.renderAll();
+    this.closeModal("modalQuickStockIn");
+    alert(`Đã nhập thêm thành công +${qty} ${p.unit} "${p.name}" vào kho!`);
+  }
+
   // ================= 6. TAB BẢNG GIÁ VỐN & GIÁ SỈ NIÊM YẾT =================
   renderCOGSTable() {
     const tbody = document.getElementById("cogsTableBody");
@@ -1962,6 +2028,22 @@ class FinanceApp {
         </tr>
       `;
     }).join("");
+  }
+
+  editCustomer(customerId) {
+    const c = this.customers.find(item => item.id === customerId);
+    if (!c) return;
+
+    const el = id => document.getElementById(id);
+    if (el("custEditId")) el("custEditId").value = c.id;
+    if (el("custName")) el("custName").value = c.name;
+    if (el("custPhone")) el("custPhone").value = c.phone || "";
+    if (el("custType")) el("custType").value = c.type || "wholesale";
+    if (el("custAddress")) el("custAddress").value = c.address || "";
+    if (el("custNote")) el("custNote").value = c.note || "";
+    if (el("modalAddCustomerTitle")) el("modalAddCustomerTitle").textContent = `✏️ Cập Nhật Khách Hàng: ${c.name}`;
+
+    this.openModal("modalAddCustomer");
   }
 
   saveCustomer(formData) {
@@ -2413,6 +2495,14 @@ class FinanceApp {
     if (m) m.classList.remove("active");
   }
 
+  printReceipt() {
+    document.body.classList.add("printing-receipt");
+    window.print();
+    setTimeout(() => {
+      document.body.classList.remove("printing-receipt");
+    }, 1000);
+  }
+
   initEventListeners() {
     document.querySelectorAll(".tab-btn").forEach(btn => {
       btn.addEventListener("click", () => this.switchTab(btn.getAttribute("data-tab")));
@@ -2476,6 +2566,17 @@ class FinanceApp {
     }
 
     // Form Add Stock In
+    const stockInSelect = document.getElementById("stockInProductId");
+    if (stockInSelect) {
+      stockInSelect.addEventListener("change", () => {
+        const prod = this.products.find(p => p.id === stockInSelect.value);
+        const priceInput = document.getElementById("stockInPrice");
+        if (prod && priceInput) {
+          priceInput.value = prod.raw_price || 0;
+        }
+      });
+    }
+
     const formStockIn = document.getElementById("formStockIn");
     if (formStockIn) {
       formStockIn.addEventListener("submit", e => {

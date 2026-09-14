@@ -748,7 +748,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary btn-modal-close">Đóng</button>
-        <button type="button" class="btn btn-primary" onclick="window.print()">🖨️ In Phiếu Bán Hàng</button>
+        <button type="button" class="btn btn-primary" onclick="app.printReceipt()">🖨️ In Phiếu Bán Hàng</button>
       </div>
     </div>
   </div>
@@ -817,7 +817,7 @@
   <div id="modalAddCustomer" class="modal-backdrop">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>👥 Thêm Mới / Cập Nhật Khách Hàng</h3>
+        <h3 id="modalAddCustomerTitle">👥 Thêm Mới / Cập Nhật Khách Hàng</h3>
         <button class="modal-close">&times;</button>
       </div>
       <form id="formAddCustomer">
@@ -971,15 +971,6 @@
     </div>
   </div>
 
-  <script src="js/finance.js"></script>
-  <script>
-    // Khởi tạo ngày hôm nay cho các input date
-    const today = new Date().toISOString().slice(0, 10);
-    if (document.getElementById("txnDate")) document.getElementById("txnDate").value = today;
-    if (document.getElementById("orderDate")) document.getElementById("orderDate").value = today;
-    if (document.getElementById("stockInDate")) document.getElementById("stockInDate").value = today;
-  </script>
-
   <!-- ================= MODAL: THÊM SẢN PHẨM MỚI VÀO DANH MỤC ================= -->
   <div id="modalAddProduct" class="modal-backdrop">
     <div class="modal-content">
@@ -1078,5 +1069,13 @@
     </div>
   </div>
 
+  <script src="js/finance.js"></script>
+  <script>
+    // Khởi tạo ngày hôm nay cho các input date
+    const today = new Date().toISOString().slice(0, 10);
+    if (document.getElementById("txnDate")) document.getElementById("txnDate").value = today;
+    if (document.getElementById("orderDate")) document.getElementById("orderDate").value = today;
+    if (document.getElementById("stockInDate")) document.getElementById("stockInDate").value = today;
+  </script>
 </body>
 </html>
