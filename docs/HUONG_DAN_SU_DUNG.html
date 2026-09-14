@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Hướng Dẫn Sử Dụng — Hệ Thống Tài Chính & Giá Vốn Bình Loan</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap');
+
+    @page {
+      size: A4;
+      margin: 14mm 16mm 16mm 16mm;
+      @bottom-right {
+        content: counter(page);
+        font-size: 9pt;
+        color: #64748b;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #1e293b;
+      line-height: 1.6;
+      font-size: 10pt;
+      background: #ffffff;
+    }
+
+    /* Cover / Header Section */
+    .header-box {
+      border-bottom: 3px solid #1b4332;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      font-size: 32pt;
+    }
+
+    .brand-info h1 {
+      font-size: 20pt;
+      font-weight: 800;
+      color: #1b4332;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    .brand-info .subtitle {
+      font-size: 11pt;
+      font-weight: 600;
+      color: #d94680;
+    }
+
+    .brand-meta {
+      text-align: right;
+      font-size: 8.5pt;
+      color: #64748b;
+      line-height: 1.4;
+    }
+
+    .doc-badge {
+      display: inline-block;
+      background: #e8f5e9;
+      color: #1b4332;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 8.5pt;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    h2 {
+      font-size: 13pt;
+      font-weight: 700;
+      color: #1b4332;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      padding-bottom: 4px;
+      border-bottom: 1.5px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      page-break-after: avoid;
+    }
+
+    h3 {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #334155;
+      margin-top: 12px;
+      margin-bottom: 6px;
+      page-break-after: avoid;
+    }
+
+    p {
+      margin-bottom: 8px;
+      color: #334155;
+      text-align: justify;
+    }
+
+    ul, ol {
+      margin-left: 20px;
+      margin-bottom: 10px;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    /* Highlight Cards & Boxes */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 12px 0;
+    }
+
+    .card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 9pt;
+    }
+
+    .card-title {
+      font-weight: 700;
+      color: #1b4332;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .alert-box {
+      background: #fdf2f8;
+      border-left: 4px solid #d94680;
+      padding: 10px 14px;
+      border-radius: 0 6px 6px 0;
+      margin: 12px 0;
+      font-size: 9pt;
+      color: #831843;
+    }
+
+    .tip-box {
+      background: #f0fdf4;
+      border-left: 4px solid #16a34a;
+      padding: 10px 14px;
+      border-radius: 0 6px 6px 0;
+      margin: 12px 0;
+      font-size: 9pt;
+      color: #14532d;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 8.5pt;
+      page-break-inside: avoid;
+    }
+
+    th {
+      background: #1b4332;
+      color: #ffffff;
+      font-weight: 600;
+      text-align: left;
+      padding: 7px 10px;
+      border: 1px solid #1b4332;
+    }
+
+    td {
+      padding: 6px 10px;
+      border: 1px solid #cbd5e1;
+      vertical-align: middle;
+    }
+
+    tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 7.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-green { background: #dcfce7; color: #15803d; }
+    .badge-yellow { background: #fef9c3; color: #854d0e; }
+    .badge-red { background: #fee2e2; color: #b91c1c; }
+    .badge-blue { background: #e0f2fe; color: #0369a1; }
+
+    .step-number {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      background: #1b4332;
+      color: #fff;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 18px;
+      font-size: 8pt;
+      font-weight: 700;
+      margin-right: 4px;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+
+    .footer-note {
+      margin-top: 24px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 10px;
+      font-size: 8pt;
+      color: #94a3b8;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header-box">
+    <div class="brand-title">
+      <div class="logo-icon">🪷</div>
+      <div class="brand-info">
+        <h1>BÌNH LOAN</h1>
+        <div class="subtitle">THỰC PHẨM CHAY TRUYỀN THỐNG — CAO LÃNH, ĐỒNG THÁP</div>
+      </div>
+    </div>
+    <div class="brand-meta">
+      <div class="doc-badge">TÀI LIỆU NỘI BỘ</div>
+      <div><strong>Hệ Thống Quản Trị Tài Chính & Giá Vốn</strong></div>
+      <div>Phiên bản: v2.0 (2026)</div>
+      <div>Website: <code>thucphamchaybinhloan.com</code></div>
+    </div>
+  </div>
+
+  <!-- Intro -->
+  <div class="tip-box">
+    <strong>Mục đích tài liệu:</strong> Hướng dẫn thao tác nhanh, đơn giản và trực quan dành cho Chủ cửa hàng, Nhân viên Thu ngân và Kế toán cửa hàng Thực phẩm Chay Bình Loan trong việc ghi nhận thu chi, kiểm soát dòng tiền và tính toán giá vốn hàng ngày.
+  </div>
+
+  <!-- Phần 1 -->
+  <h2>1. Cách Mở & Truy Cập Ứng Dụng</h2>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">💻 Trên Máy Tính Để Bàn / Laptop</div>
+      <p>Mở file <strong><code>finance.html</code></strong> bằng bất kỳ trình duyệt web nào (Chrome, Cốc Cốc, Safari, Edge). Ứng dụng chạy mượt mà ngay cả khi không có mạng Internet (Offline-Ready).</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📱 Trên Điện Thoại Di Động</div>
+      <p>Truy cập qua liên kết website trên điện thoại. Bạn có thể chọn <em>"Thêm vào Màn hình chính" (Add to Home Screen)</em> để mở nhanh như một ứng dụng độc lập trên điện thoại.</p>
+    </div>
+  </div>
+
+  <!-- Phần 2 -->
+  <h2>2. Bốn Khu Vực Chức Năng Chính (Tabs)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">Tên Tab</th>
+        <th style="width: 35%;">Chức năng cốt lõi</th>
+        <th style="width: 40%;">Lợi ích thực tế cho cửa hàng</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>📊 Tổng Quan & Dòng Tiền</strong></td>
+        <td>Theo dõi số dư tiền mặt thời gian thực, tổng thu, tổng chi, biểu đồ trực quan.</td>
+        <td>Biết ngay cửa hàng đang dư hay thiếu bao nhiêu tiền mặt; cảnh báo số ngày an toàn chi trả.</td>
+      </tr>
+      <tr>
+        <td><strong>💵 Sổ Thu Chi & Báo Cáo P&L</strong></td>
+        <td>Ghi chép giao dịch bán lẻ, bán sỉ, tiền điện lạnh, tiền lương, nhập hàng; tính lãi ròng.</td>
+        <td>Rõ ràng từng đồng tiền ra vào, loại bỏ thất thoát và biết chính xác lợi nhuận thực tế theo kỳ.</td>
+      </tr>
+      <tr>
+        <td><strong>🏷️ Bảng Giá Vốn & Định Giá</strong></td>
+        <td>Tự động tính Giá Cost, Giá bán lẻ (+30%), Giá bán sỉ (+20%) cho 41 mặt hàng chay.</td>
+        <td>Không cần nhớ công thức Excel phức tạp; đổi giá nhập là hệ thống tự cập nhật giá cost ngay.</td>
+      </tr>
+      <tr>
+        <td><strong>📦 Quản Lý Kho & Vốn Tồn</strong></td>
+        <td>Thống kê số lượng tồn kho từng món và tổng số tiền vốn đang nằm trong kho hàng.</td>
+        <td>Kiểm soát vốn lưu động, tránh tồn kho quá hạn (đặc biệt với đồ mát và đồ đông lạnh).</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Phần 3 -->
+  <h2>3. Hướng Dẫn Ghi Nhận Thu — Chi Hàng Ngày</h2>
+  <p>Khi phát sinh tiền bán hàng hoặc chi trả tiền mặt/chuyển khoản, thực hiện 3 bước:</p>
+  
+  <ol>
+    <li><strong>Mở form:</strong> Vào tab <strong>💵 Sổ Thu Chi & Báo Cáo P&L</strong> $\to$ bấm nút xanh <strong><code>➕ Ghi Nhận Thu / Chi Mới</code></strong>.</li>
+    <li><strong>Điền các thông tin:</strong>
+      <ul>
+        <li><strong>Loại giao dịch:</strong> Chọn <code>⬇ Thu Tiền Vào</code> (khi bán hàng) hoặc <code>⬆ Chi Tiền Ra</code> (khi trả chi phí).</li>
+        <li><strong>Ngày:</strong> Mặc định là ngày hôm nay (có thể chọn ngày cũ để ghi bù).</li>
+        <li><strong>Danh mục:</strong> Chọn đúng nhóm như <em>Bán lẻ tại quầy, Bán sỉ đại lý, Tiền điện & kho lạnh, Lương nhân viên, Nhập nguyên liệu...</em></li>
+        <li><strong>Số tiền (VNĐ):</strong> Gõ số tiền (ví dụ: <code>1500000</code>).</li>
+        <li><strong>Hình thức:</strong> Chọn <em>Tiền mặt tại quầy</em> hoặc <em>Chuyển khoản VietQR</em>.</li>
+        <li><strong>Đối tác & Ghi chú:</strong> Tên đại lý mua hàng hoặc số hóa đơn nhà cung cấp.</li>
+      </ul>
+    </li>
+    <li><strong>Lưu:</strong> Bấm <strong><code>Lưu Giao Dịch</code></strong>. Số dư tiền mặt và biểu đồ tài chính sẽ nhảy tự động ngay lập tức!</li>
+  </ol>
+
+  <div class="alert-box">
+    <strong>Lưu ý xóa giao dịch:</strong> Nếu lỡ nhập sai số tiền, chỉ cần bấm nút <strong><code>Xóa</code></strong> màu xám ở cột ngoài cùng bên phải của dòng giao dịch đó.
+  </div>
+
+  <!-- Page Break for clean 2-page print -->
+  <div class="page-break"></div>
+
+  <!-- Phần 4 -->
+  <h2>4. Bảng Tính Giá Vốn (COGS) & Ý Nghĩa Nhãn Cảnh Báo</h2>
+
+  <h3>A. Công Thức Chuẩn Hóa Từ Bảng Kế Toán Bình Loan:</h3>
+  <div class="card" style="background: #f0fdf4; border-color: #86efac; margin-bottom: 12px;">
+    <ul style="margin-left: 18px; margin-bottom: 0;">
+      <li><strong>Giá sau VAT (8%):</strong> $\text{Đơn giá nhập gốc} \times 1.08$</li>
+      <li><strong>Thuế khoán Hộ Kinh Doanh (1.5%):</strong> $\text{Giá sau VAT} \times 1.5\%$</li>
+      <li><strong>Phí điện lạnh & bảo quản mát/đông (1%):</strong> $\text{Đơn giá nhập gốc} \times 1\%$</li>
+      <li>👉 <strong>GIÁ COST (Giá vốn xuất kho):</strong> $\text{Giá sau VAT} + \text{Thuế khoán} + \text{Phí điện lạnh}$</li>
+      <li>👉 <strong>Giá lẻ đề xuất (+30% Margin):</strong> $\text{Giá Cost} \times 1.30$</li>
+      <li>👉 <strong>Giá sỉ đề xuất (+20% Margin):</strong> $\text{Giá Cost} \times 1.20$</li>
+    </ul>
+  </div>
+
+  <h3>B. Cách Đọc Nhãn Màu Biên Lợi Nhuận (Margins):</h3>
+  <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+    <div style="flex: 1; border: 1px solid #86efac; background: #f0fdf4; padding: 8px 10px; border-radius: 6px;">
+      <span class="badge badge-green">MÀU XANH LÁ</span>
+      <div style="font-size: 8.5pt; margin-top: 4px;"><strong>Lãi Tốt (&ge; 25%):</strong> Mặt hàng có biên lợi nhuận an toàn cao, nên đẩy mạnh bán ra.</div>
+    </div>
+    <div style="flex: 1; border: 1px solid #fde047; background: #fefce8; padding: 8px 10px; border-radius: 6px;">
+      <span class="badge badge-yellow">MÀU VÀNG</span>
+      <div style="font-size: 8.5pt; margin-top: 4px;"><strong>Lãi Vừa (15% - 25%):</strong> Lợi nhuận ổn định, cần duy trì kiểm soát hao hụt.</div>
+    </div>
+    <div style="flex: 1; border: 1px solid #fca5a5; background: #fef2f2; padding: 8px 10px; border-radius: 6px;">
+      <span class="badge badge-red">MÀU ĐỎ</span>
+      <div style="font-size: 8.5pt; margin-top: 4px;"><strong>Cảnh Báo (&lt; 15% hoặc Lỗ):</strong> Giá bán quá sát giá vốn! Cần tăng giá bán hoặc đàm phán lại giá nhập.</div>
+    </div>
+  </div>
+
+  <h3>C. Thao Tác Chỉnh Sửa Nhanh Trên Bảng:</h3>
+  <ul>
+    <li><strong>Đổi giá nhập gốc:</strong> Bấm thẳng vào ô số tại cột <code>Đơn Giá Nhập (G)</code> trên bảng và gõ số tiền mới $\to$ Hệ thống sẽ tính lại Giá Cost và Giá bán đề xuất ngay lập tức.</li>
+    <li><strong>Thêm sản phẩm mới:</strong> Bấm nút màu hồng sen <strong><code>➕ Thêm Mặt Hàng</code></strong> để bổ sung món mới vào danh mục.</li>
+  </ul>
+
+  <!-- Phần 5 -->
+  <h2>5. Xuất File Excel, In Ấn & Sao Lưu Dữ Liệu</h2>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">📥 Xuất File Excel / CSV</div>
+      <p>Bấm nút <strong>`Xuất Thu Chi`</strong> hoặc <strong>`Xuất Bảng Giá Vốn`</strong> để tải file dạng Excel về máy tính, dùng gửi cho kế toán làm báo cáo thuế hoặc đối chiếu định kỳ.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🖨️ In Báo Cáo Chuẩn A4</div>
+      <p>Bấm nút <strong>`In A4`</strong> trên thanh Menu. Hệ thống tự căn lề đẹp mắt, sẵn sàng gửi lệnh in ra máy in giấy hoặc lưu thành file PDF.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">💾 Sao Lưu Định Kỳ (Backup)</div>
+      <p>Bấm nút <strong>`Sao Lưu`</strong> để tải về file <code>.json</code> lưu lại toàn bộ dữ liệu của quán. Nên bấm sao lưu 1 lần mỗi tuần để phòng sự cố hỏng máy.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📤 Khôi Phục / Chuyển Máy</div>
+      <p>Khi đổi sang máy tính hoặc điện thoại mới, chỉ cần bấm nút <strong>`Khôi Phục`</strong> và chọn file sao lưu cũ để tiếp tục làm việc mà không bị mất dữ liệu.</p>
+    </div>
+  </div>
+
+  <!-- Phần 6 -->
+  <h2>6. Giải Đáp Thắc Mắc Thường Gặp (FAQ)</h2>
+  <p><strong>1. Tắt máy tính hoặc đóng trình duyệt có bị mất sổ thu chi không?</strong><br>
+  👉 <em>Không. Hệ thống tự động lưu vào bộ nhớ cục bộ (LocalStorage) của máy bạn ngay khi bạn bấm Lưu.</em></p>
+  
+  <p><strong>2. Nếu lỡ tay xóa nhầm hoặc muốn quay về dữ liệu mẫu ban đầu thì làm sao?</strong><br>
+  👉 <em>Chỉ cần bấm nút <strong>`🔄 Mặc Định`</strong> trên thanh Menu, hệ thống sẽ khôi phục lại 41 sản phẩm nguyên bản từ Google Sheet của Bình Loan.</em></p>
+
+  <div class="footer-note">
+    © 2026 DNTN Sản Xuất Thực Phẩm Chay Bình Loan — 37-38 Nguyễn Văn Trỗi, Phường 2, TP. Cao Lãnh, Đồng Tháp.<br>
+    Tiêu chuẩn ISO 22000:2018 — Hàng Việt Nam Chất Lượng Cao — OCOP 3 Sao.
+  </div>
+
+</body>
+</html>
