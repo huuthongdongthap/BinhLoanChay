@@ -25,6 +25,7 @@
       </a>
 
       <div class="nav-actions">
+        <button class="btn btn-lotus" style="font-weight: 700; box-shadow: 0 2px 6px rgba(217, 70, 128, 0.35); font-size: 13.5px;" onclick="app.initPosCart(); app.openModal('modalCreateOrder');">🛒 BÁN HÀNG NHANH (POS)</button>
         <button class="btn btn-secondary" onclick="app.exportExcelCSV('orders')">📥 Xuất Đơn Hàng</button>
         <button class="btn btn-secondary" onclick="app.exportExcelCSV('xnt')">📥 Xuất X-N-T</button>
         <button class="btn btn-secondary" onclick="app.exportExcelCSV('customers')">📥 Xuất Khách Hàng</button>
@@ -240,7 +241,8 @@
           <div class="panel-title">
             <span>📦 Báo Cáo Xuất - Nhập - Tồn (X-N-T) Toàn Bộ 41 Mặt Hàng Chay</span>
           </div>
-          <div style="display: flex; gap: 8px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-lotus" onclick="app.openModal('modalAddProduct')">✨ Thêm Món Chay Mới</button>
             <button class="btn btn-primary" onclick="app.openModal('modalStockIn')">📥 Nhập Hàng Vào Kho</button>
           </div>
         </div>
@@ -318,6 +320,9 @@
         <div class="panel-header">
           <div class="panel-title">
             <span>🏷️ Bảng Tính Giá Vốn (COGS) & Cột Điều Chỉnh Giá Sỉ Niêm Yết</span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-lotus" onclick="app.openModal('modalAddProduct')">✨ Thêm Món Chay Mới</button>
           </div>
         </div>
 
@@ -493,9 +498,12 @@
 
         <!-- Add Item Selector Section -->
         <div class="pos-item-selector">
-          <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px; color: var(--primary);">Chọn món thêm vào đơn:</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="font-weight: 600; font-size: 13px; color: var(--primary);">Chọn món thêm vào đơn:</div>
+            <button type="button" class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px; color: var(--lotus); border-color: var(--lotus);" onclick="app.openModal('modalAddProduct')">✨ + Thêm Món Mới Ngoài Menu</button>
+          </div>
           <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 260px;">
+            <div style="flex: 1; min-width: 240px;">
               <select id="posAddProductId" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
                 <!-- Populated via JS -->
               </select>
@@ -665,7 +673,10 @@
         <div class="modal-body">
           <div class="form-grid">
             <div class="form-group form-full">
-              <label>Chọn Mặt Hàng Chay Cần Nhập</label>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label style="margin-bottom: 0;">Chọn Mặt Hàng Chay Cần Nhập</label>
+                <button type="button" style="background: none; border: none; color: var(--lotus); font-weight: 600; font-size: 11.5px; cursor: pointer; text-decoration: underline;" onclick="app.openModal('modalAddProduct')">+ Thêm Món Mới Chưa Có Trong Danh Mục</button>
+              </div>
               <select id="stockInProductId" required>
                 <!-- Populated via JS -->
               </select>
@@ -802,6 +813,16 @@
       </div>
       <form id="formAddTxn">
         <div class="modal-body">
+          <!-- Banner gợi ý bán hàng POS tự đồng bộ thu chi & trừ kho -->
+          <div id="txnPosNotice" style="background: linear-gradient(135deg, #fdf2f8, #f0fdf4); border: 1.5px dashed var(--lotus); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <div>
+              <div style="font-weight: 700; color: var(--lotus-dark); font-size: 13px;">🛒 Bán Hàng & Thu Tiền Tự Động?</div>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Nếu đây là đơn bán hàng theo món, bạn nên dùng <strong>Bán Hàng POS</strong> để vừa trừ kho vừa tự đồng bộ tiền thu!</div>
+            </div>
+            <button type="button" class="btn btn-lotus" style="font-size: 12px; padding: 6px 12px;" onclick="app.closeModal('modalAddTxn'); app.initPosCart(); app.openModal('modalCreateOrder');">
+              👉 Chuyển Sang Tạo Đơn Bán Món
+            </button>
+          </div>
           <div class="form-grid">
             <div class="form-group">
               <label>Loại Giao Dịch</label>
@@ -867,5 +888,63 @@
     if (document.getElementById("orderDate")) document.getElementById("orderDate").value = today;
     if (document.getElementById("stockInDate")) document.getElementById("stockInDate").value = today;
   </script>
+
+  <!-- ================= MODAL: THÊM SẢN PHẨM MỚI VÀO DANH MỤC ================= -->
+  <div id="modalAddProduct" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>✨ Thêm Món Chay Mới Vào Danh Mục</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <form id="formAddProduct">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label>Tên Sản Phẩm Chay Mới</label>
+              <input type="text" id="addProdName" placeholder="Ví dụ: Chả lụa nấm tuyết 300g" required>
+            </div>
+            <div class="form-group">
+              <label>Nhóm Sản Phẩm</label>
+              <select id="addProdCategory" required>
+                <option value="SẢN PHẨM ĐÓNG LON">Sản Phẩm Đóng Lon</option>
+                <option value="SẢN PHẨM ĐÔNG LẠNH" selected>Sản Phẩm Đông Lạnh</option>
+                <option value="SẢN PHẨM MÁT">Sản Phẩm Mát</option>
+                <option value="SẢN PHẨM KHÔ">Sản Phẩm Khô</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Quy Cách / Trọng Lượng</label>
+              <input type="text" id="addProdWeight" placeholder="Ví dụ: 300g/gói, 200g/lon">
+            </div>
+            <div class="form-group">
+              <label>Đơn Vị Tính (ĐVT)</label>
+              <input type="text" id="addProdUnit" value="Gói" placeholder="Lon, Vỉ, Gói, Kg..." required>
+            </div>
+            <div class="form-group">
+              <label>Đơn Giá Nhập Gốc (G) VNĐ</label>
+              <input type="number" id="addProdRawPrice" min="0" placeholder="Ví dụ: 25000" required>
+            </div>
+            <div class="form-group">
+              <label>Giá Bán Lẻ Niêm Yết (VNĐ)</label>
+              <input type="number" id="addProdRetailActual" min="0" placeholder="Để trống tự tính Cost + 30%">
+            </div>
+            <div class="form-group">
+              <label>Giá Sỉ Niêm Yết Thực Tế (VNĐ)</label>
+              <input type="number" id="addProdWholesaleActual" min="0" placeholder="Để trống tự tính Cost + 20%">
+            </div>
+            <div class="form-group">
+              <label>Số Lượng Tồn Kho Ban Đầu</label>
+              <input type="number" id="addProdInventory" value="0" min="0">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-modal-close">Hủy</button>
+          <button type="submit" class="btn btn-lotus">Lưu Mặt Hàng Vào Menu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 </body>
 </html>

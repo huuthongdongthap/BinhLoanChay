@@ -2330,6 +2330,61 @@ class FinanceApp {
     if (m) m.classList.add("active");
   }
 
+  addNewProduct(formData) {
+    const rawPrice = Number(formData.raw_price) || 0;
+    const cat = formData.category || "SẢN PHẨM ĐÔNG LẠNH";
+    const initialQty = Number(formData.inventory_qty) || 0;
+
+    // Tự động sinh mã sản phẩm BL-xxx
+    const nextNum = this.products.length + 1;
+    const newId = "BL-" + String(nextNum).padStart(3, "0");
+
+    // Tính giá cost tự động
+    const vatPrice = Math.round(rawPrice * (1 + this.settings.vatRate));
+    const tax = Math.round(vatPrice * this.settings.taxRate);
+    const storageFee = Math.round(rawPrice * this.settings.storageFeeRate);
+    const costPrice = vatPrice + tax + storageFee;
+    const retailSug = Math.round(costPrice * (1 + this.settings.retailMargin));
+    const wholesaleSug = Math.round(costPrice * (1 + this.settings.wholesaleMargin));
+
+    const retailActual = Number(formData.retail_actual) || (retailSug > 0 ? retailSug : 0);
+    const wholesaleActual = Number(formData.wholesale_actual) || (wholesaleSug > 0 ? wholesaleSug : 0);
+
+    const newProd = {
+      id: newId,
+      category: cat,
+      name: formData.name,
+      weight: formData.weight || "",
+      unit: formData.unit || "Gói",
+      raw_price: rawPrice,
+      vat_price: vatPrice,
+      tax: tax,
+      cost_price: costPrice,
+      retail_suggested: retailSug,
+      retail_actual: retailActual,
+      wholesale_suggested: wholesaleSug,
+      wholesale_actual: wholesaleActual,
+      inventory_qty: initialQty,
+      opening_qty: initialQty,
+      in_qty: 0,
+      out_qty: 0
+    };
+
+    this.products.push(newProd);
+    this.saveStorage("bl_products_v2", this.products);
+    this.renderAll();
+    this.closeModal("modalAddProduct");
+
+    // Tự động chọn món vừa thêm trong giỏ POS nếu đang mở
+    const posSelect = document.getElementById("posAddProductId");
+    if (posSelect) posSelect.value = newId;
+
+    const stockSelect = document.getElementById("stockInProductId");
+    if (stockSelect) stockSelect.value = newId;
+
+    alert(`Đã thêm món chay "${formData.name}" (Mã: ${newId}) vào danh mục thành công!`);
+  }
+
   closeModal(id) {
     const m = document.getElementById(id);
     if (m) m.classList.remove("active");
@@ -2346,6 +2401,39 @@ class FinanceApp {
         if (m) m.classList.remove("active");
       });
     });
+
+    // Form Add Product
+    const formAddProd = document.getElementById("formAddProduct");
+    if (formAddProd) {
+      formAddProd.addEventListener("submit", e => {
+        e.preventDefault();
+        this.addNewProduct({
+          name: document.getElementById("addProdName").value,
+          category: document.getElementById("addProdCategory").value,
+          weight: document.getElementById("addProdWeight").value,
+          unit: document.getElementById("addProdUnit").value,
+          raw_price: document.getElementById("addProdRawPrice").value,
+          retail_actual: document.getElementById("addProdRetailActual").value,
+          wholesale_actual: document.getElementById("addProdWholesaleActual").value,
+          inventory_qty: document.getElementById("addProdInventory").value
+        });
+        formAddProd.reset();
+      });
+    }
+
+    // Toggle notice khi chọn danh mục Thu Chi
+    const txnCatSelect = document.getElementById("txnCategory");
+    const txnTypeSelect = document.getElementById("txnType");
+    const txnPosNotice = document.getElementById("txnPosNotice");
+    const updateNotice = () => {
+      if (txnPosNotice && txnTypeSelect && txnCatSelect) {
+        const isSales = txnTypeSelect.value === "income" && (txnCatSelect.value.includes("Bán lẻ") || txnCatSelect.value.includes("Bán sỉ"));
+        txnPosNotice.style.display = isSales ? "flex" : "none";
+      }
+    };
+    if (txnCatSelect) txnCatSelect.addEventListener("change", updateNotice);
+    if (txnTypeSelect) txnTypeSelect.addEventListener("change", updateNotice);
+    updateNotice();
 
     // Form Add Transaction
     const addTxnForm = document.getElementById("formAddTxn");
