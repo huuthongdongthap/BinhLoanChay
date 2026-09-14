@@ -609,3 +609,69 @@ body {
     padding: 0;
   }
 }
+
+/* ================== POS & ORDER STYLES ================== */
+.modal-large {
+  max-width: 850px;
+}
+
+.pos-item-selector {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.pos-summary-box {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pos-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13.5px;
+}
+
+/* ================== RECEIPT & BILL STYLES ================== */
+.receipt-box {
+  background: #ffffff;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  max-width: 480px;
+  margin: 0 auto;
+  font-family: var(--font-body);
+}
+
+.receipt-store-header {
+  text-align: center;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
+
+/* ================== PRINT SPECIFIC MEDIA ================== */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printableReceiptArea, #printableReceiptArea * {
+    visibility: visible;
+  }
+  #printableReceiptArea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: 100%;
+    border: none;
+    padding: 0;
+  }
+}
