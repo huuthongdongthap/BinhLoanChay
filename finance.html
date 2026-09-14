@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Trị Thu Chi, Dòng Tiền & Giá Vốn — Thực Phẩm Chay Bình Loan</title>
+  <meta name="description" content="Hệ thống cân đối thu chi, quản trị dòng tiền và tính toán giá vốn toàn diện cho Cửa hàng Thực phẩm Chay Bình Loan - Cao Lãnh, Đồng Tháp.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/finance.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="top-navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="brand-section">
+        <div class="brand-logo-badge">🪷</div>
+        <div class="brand-info">
+          <h1>BÌNH LOAN <span style="font-size: 13px; font-weight: normal; color: var(--lotus); background: var(--lotus-light); padding: 2px 8px; border-radius: 12px;">Tài Chính & Giá Vốn</span></h1>
+          <p>Thực Phẩm Chay Cao Lãnh — Đồng Tháp (Since 1994)</p>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <button class="btn btn-secondary" onclick="app.exportExcelCSV('transactions')">📥 Xuất Thu Chi</button>
+        <button class="btn btn-secondary" onclick="app.exportExcelCSV('cogs')">📥 Xuất Bảng Giá Vốn</button>
+        <button class="btn btn-secondary" onclick="app.exportJSONBackup()">💾 Sao Lưu</button>
+        <label class="btn btn-secondary" style="cursor: pointer; margin-bottom: 0;">
+          📤 Khôi Phục
+          <input type="file" accept=".json" style="display: none;" onchange="app.importJSONBackup(this.files[0])">
+        </label>
+        <button class="btn btn-secondary" onclick="window.print()">🖨️ In A4</button>
+        <button class="btn btn-secondary" onclick="app.resetToDefaults()" title="Khôi phục nguyên bản từ Google Sheet">🔄 Mặc Định</button>
+        <a href="index.html" class="btn btn-primary">🏠 Về Trang Chủ</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- App Container -->
+  <main class="app-container">
+
+    <!-- Tab Bar -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="overview">
+        📊 Tổng Quan & Dòng Tiền
+      </button>
+      <button class="tab-btn" data-tab="cashflow">
+        💵 Sổ Thu Chi & Báo Cáo P&L
+      </button>
+      <button class="tab-btn" data-tab="cogs">
+        🏷️ Bảng Tính Giá Vốn & Định Giá (41 Sản Phẩm)
+      </button>
+      <button class="tab-btn" data-tab="inventory">
+        📦 Quản Lý Kho & Vốn Hàng Hóa
+      </button>
+    </nav>
+
+    <!-- ================= TAB 1: TỔNG QUAN & DÒNG TIỀN ================= -->
+    <section id="overview" class="tab-pane active">
+      <!-- KPI Cards Grid -->
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-net">
+          <div class="kpi-header">
+            <span class="kpi-title">Tiền Mặt Khả Dụng</span>
+            <span class="kpi-icon" style="background: var(--primary-subtle); color: var(--primary);">💰</span>
+          </div>
+          <div class="kpi-value" id="kpiCurrentCash">0 ₫</div>
+          <div class="kpi-subtext">
+            <span>Sức khỏe:</span>
+            <span id="cashHealthBadge" class="badge badge-margin-good">Khỏe mạnh</span>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-inflow">
+          <div class="kpi-header">
+            <span class="kpi-title">Tổng Dòng Thu (Inflow)</span>
+            <span class="kpi-icon" style="background: var(--success-light); color: var(--success);">⬇</span>
+          </div>
+          <div class="kpi-value" style="color: var(--success);" id="kpiInflow">0 ₫</div>
+          <div class="kpi-subtext" style="color: var(--text-muted);">Doanh số bán lẻ + bán sỉ đại lý</div>
+        </div>
+
+        <div class="kpi-card kpi-outflow">
+          <div class="kpi-header">
+            <span class="kpi-title">Tổng Dòng Chi (Outflow)</span>
+            <span class="kpi-icon" style="background: var(--danger-light); color: var(--danger);">⬆</span>
+          </div>
+          <div class="kpi-value" style="color: var(--danger);" id="kpiOutflow">0 ₫</div>
+          <div class="kpi-subtext" style="color: var(--text-muted);">Giá vốn + điện lạnh + lương + kho</div>
+        </div>
+
+        <div class="kpi-card kpi-profit">
+          <div class="kpi-header">
+            <span class="kpi-title">Dòng Tiền Ròng (Net Cash)</span>
+            <span class="kpi-icon" style="background: var(--lotus-light); color: var(--lotus);">⚖</span>
+          </div>
+          <div class="kpi-value" id="kpiNetCash">0 ₫</div>
+          <div class="kpi-subtext" style="color: var(--text-muted);">Thu vào trừ đi các khoản chi</div>
+        </div>
+
+        <div class="kpi-card kpi-profit">
+          <div class="kpi-header">
+            <span class="kpi-title">Lợi Nhuận Ròng (P&L)</span>
+            <span class="kpi-icon" style="background: var(--lotus-light); color: var(--lotus);">📈</span>
+          </div>
+          <div class="kpi-value" id="kpiNetProfit">0 ₫</div>
+          <div class="kpi-subtext" style="color: var(--text-muted);">
+            Biên gộp: <strong id="kpiGrossMargin" style="color: var(--primary);">0%</strong>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-cogs">
+          <div class="kpi-header">
+            <span class="kpi-title">Vốn Hàng Hóa Tồn Kho</span>
+            <span class="kpi-icon" style="background: var(--accent-gold-light); color: var(--accent-gold);">📦</span>
+          </div>
+          <div class="kpi-value" style="color: var(--accent-gold);" id="kpiStockValue">0 ₫</div>
+          <div class="kpi-subtext" style="color: var(--text-muted);">Định giá theo Giá Cost thực tế</div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="charts-grid">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>📊 Biến Động Dòng Tiền Vào & Ra Theo Ngày</span>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted);">Đơn vị: Triệu VNĐ</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="cashflowChart"></canvas>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>🥧 Cơ Cấu Chi Phí Hoạt Động</span>
+            </div>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="expensePieChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Advice & Break-even Summary -->
+      <div class="panel-card" style="background: linear-gradient(135deg, #ffffff, #f0fdf4); border-left: 4px solid var(--primary);">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>💡 Phân Tích Điểm Hòa Vốn & Quản Trị Tài Chính Cửa Hàng Bình Loan</span>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; font-size: 13px;">
+          <div style="background: white; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <div style="font-weight: 600; color: var(--primary); margin-bottom: 4px;">🎯 Doanh Thu Hòa Vốn Ước Tính (Break-even):</div>
+            <div style="font-size: 20px; font-weight: 700; color: var(--text-main);" id="kpiBreakEven">0 ₫</div>
+            <div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">Mức doanh số tối thiểu cần đạt trong kỳ để bù đắp toàn bộ chi phí vận hành (điện lạnh, mặt bằng, nhân công).</div>
+          </div>
+          <div style="background: white; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <div style="font-weight: 600; color: var(--lotus); margin-bottom: 4px;">❄️ Kiểm Soát Chi Phí Điện Lạnh & Bảo Quản:</div>
+            <p style="color: var(--text-muted); font-size: 12px;">Đặc thù thực phẩm chay (Tàu hủ ky đông lạnh, Chả chay đòn, Đậu hủ miếng tươi) tiêu tốn năng lượng tủ đông liên tục. Hệ thống tự động phân bổ 1% phí kho lạnh vào giá vốn để đảm bảo không bị âm lợi nhuận.</p>
+          </div>
+          <div style="background: white; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <div style="font-weight: 600; color: var(--accent-gold); margin-bottom: 4px;">📦 Cơ Cấu Nhóm Hàng Đóng Lon:</div>
+            <p style="color: var(--text-muted); font-size: 12px;">Dòng sản phẩm lon (Cơm gạo lức, Chả hộp, Tàu hủ ky xào sả ớt, sốt cà...) có thời hạn bảo quản dài và biên lợi nhuận ổn định (>30%), là trụ cột dòng tiền ổn định không phụ thuộc kho lạnh.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 2: SỔ THU CHI & P&L ================= -->
+    <section id="cashflow" class="tab-pane">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>💵 Sổ Ghi Chép Dòng Tiền & Báo Cáo Kết Quả Kinh Doanh</span>
+          </div>
+          <button class="btn btn-primary" onclick="app.openModal('modalAddTxn')">➕ Ghi Nhận Thu / Chi Mới</button>
+        </div>
+
+        <div class="toolbar">
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <select id="filterTxnType" class="select-filter">
+              <option value="all">Tất cả giao dịch</option>
+              <option value="income">⬇ Dòng tiền vào (Thu)</option>
+              <option value="expense">⬆ Dòng tiền ra (Chi)</option>
+            </select>
+            <input type="text" id="searchTxn" class="search-input" placeholder="Tìm theo danh mục, đối tác, ghi chú...">
+          </div>
+          <span style="font-size: 12px; color: var(--text-muted);">Tự động lưu vào trình duyệt (Offline Ready)</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Ngày</th>
+                <th>Loại</th>
+                <th>Danh Mục</th>
+                <th>Số Tiền (VND)</th>
+                <th>Hình Thức</th>
+                <th>Ghi Chú & Đối Tác</th>
+                <th style="text-align: right;">Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody id="transactionsTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 3: BẢNG TÍNH GIÁ VỐN & ĐỊNH GIÁ ================= -->
+    <section id="cogs" class="tab-pane">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>🏷️ Bảng Tính Giá Vốn (COGS) & Biên Lợi Nhuận Cho 41 Sản Phẩm Thực Tế</span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-lotus" onclick="app.openModal('modalAddProduct')">➕ Thêm Mặt Hàng</button>
+          </div>
+        </div>
+
+        <!-- Formula Explainer Banner -->
+        <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 16px; font-size: 12px; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 16px; align-items: center;">
+          <div><strong>📐 Công thức kế toán Bình Loan:</strong></div>
+          <div>• VAT: <span style="color: var(--primary); font-weight: 600;">+8%</span></div>
+          <div>• Thuế khoán Hộ KD: <span style="color: var(--primary); font-weight: 600;">1.5%</span></div>
+          <div>• Phí điện lạnh: <span style="color: var(--primary); font-weight: 600;">1%</span></div>
+          <div>• <strong>GIÁ COST</strong> = Giá nhập + VAT + Thuế + Điện lạnh</div>
+          <div>• Giá Lẻ Tham Khảo: <span style="color: #0369a1; font-weight: 600;">Cost + 30%</span></div>
+          <div>• Giá Sỉ Tham Khảo: <span style="color: #b45309; font-weight: 600;">Cost + 20%</span></div>
+        </div>
+
+        <div class="toolbar">
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <select id="filterCogsCat" class="select-filter">
+              <option value="all">Tất cả nhóm sản phẩm</option>
+              <option value="SẢN PHẨM ĐÓNG LON">Sản Phẩm Đóng Lon (9 món)</option>
+              <option value="SẢN PHẨM ĐÔNG LẠNH">Sản Phẩm Đông Lạnh (17 món)</option>
+              <option value="SẢN PHẨM MÁT">Sản Phẩm Mát (3 món)</option>
+              <option value="SẢN PHẨM KHÔ">Sản Phẩm Khô (12 món)</option>
+            </select>
+            <input type="text" id="searchCogs" class="search-input" placeholder="Tìm tên sản phẩm...">
+          </div>
+          <span style="font-size: 12px; color: var(--text-muted);">💡 Bạn có thể sửa trực tiếp đơn giá nhập trong bảng để thấy giá cost tự cập nhật</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>STT</th>
+                <th>Tên Sản Phẩm</th>
+                <th>Nhóm</th>
+                <th>ĐVT</th>
+                <th>Đơn Giá Nhập (G)</th>
+                <th>VAT (8%)</th>
+                <th>Thuế (1.5%)</th>
+                <th>GIÁ COST</th>
+                <th>Giá Lẻ TK (+30%)</th>
+                <th>Giá Lẻ Niêm Yết</th>
+                <th>Giá Sỉ TK (+20%)</th>
+                <th>Biên Lợi Nhuận</th>
+                <th style="text-align: right;">Sửa</th>
+              </tr>
+            </thead>
+            <tbody id="cogsTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 4: QUẢN LÝ KHO & VỐN HÀNG HÓA ================= -->
+    <section id="inventory" class="tab-pane">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>📦 Bảng Định Giá Vốn Hàng Tồn Kho Thực Tế</span>
+          </div>
+        </div>
+
+        <!-- Inventory Summary Stats -->
+        <div class="kpi-grid" style="margin-bottom: 20px;">
+          <div class="kpi-card" style="border-left: 4px solid var(--info);">
+            <div class="kpi-title">Tổng Số Lượng Tồn Kho</div>
+            <div class="kpi-value" id="invTotalQty">0</div>
+            <div class="kpi-subtext" style="color: var(--text-muted);">Đơn vị sản phẩm các loại</div>
+          </div>
+          <div class="kpi-card" style="border-left: 4px solid var(--accent-gold);">
+            <div class="kpi-title">Tổng Vốn Tồn Kho (Theo Cost)</div>
+            <div class="kpi-value" style="color: var(--accent-gold);" id="invTotalCost">0 ₫</div>
+            <div class="kpi-subtext" style="color: var(--text-muted);">Số vốn đang lưu kho thực tế</div>
+          </div>
+          <div class="kpi-card" style="border-left: 4px solid var(--success);">
+            <div class="kpi-title">Tổng Giá Trị Kỳ Vọng (Bán Lẻ)</div>
+            <div class="kpi-value" style="color: var(--success);" id="invTotalRetail">0 ₫</div>
+            <div class="kpi-subtext" style="color: var(--text-muted);">Doanh thu khi tiêu thụ hết kho</div>
+          </div>
+          <div class="kpi-card" style="border-left: 4px solid var(--lotus);">
+            <div class="kpi-title">Lợi Nhuận Gộp Kỳ Vọng</div>
+            <div class="kpi-value" style="color: var(--lotus);" id="invTotalProfit">0 ₫</div>
+            <div class="kpi-subtext" style="color: var(--text-muted);">Doanh thu bán lẻ trừ vốn kho</div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>STT</th>
+                <th>Tên Sản Phẩm</th>
+                <th>Nhóm</th>
+                <th>ĐVT</th>
+                <th style="text-align: center;">Số Lượng Tồn</th>
+                <th>Giá Cost</th>
+                <th>Tổng Vốn Tồn (VND)</th>
+                <th>Giá Bán Lẻ</th>
+                <th>Giá Trị Bán Lẻ (VND)</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= MODAL: THÊM GIAO DỊCH ================= -->
+  <div id="modalAddTxn" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Ghi Nhận Dòng Tiền Thu / Chi</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <form id="formAddTxn">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Loại Giao Dịch</label>
+              <select id="txnType" required>
+                <option value="income">⬇ Thu Tiền Vào (Doanh thu bán hàng)</option>
+                <option value="expense">⬆ Chi Tiền Ra (Chi phí vận hành)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Ngày Thực Hiện</label>
+              <input type="date" id="txnDate" required>
+            </div>
+            <div class="form-group">
+              <label>Danh Mục</label>
+              <select id="txnCategory" required>
+                <option value="Bán lẻ tại quầy">Bán lẻ tại quầy</option>
+                <option value="Bán sỉ đại lý">Bán sỉ đại lý</option>
+                <option value="Bán online / Giao xa">Bán online / Giao xa</option>
+                <option value="Nhập nguyên liệu / Giá vốn">Nhập nguyên liệu / Giá vốn</option>
+                <option value="Điện & Kho lạnh">Điện & Kho lạnh</option>
+                <option value="Mặt bằng cửa hàng">Mặt bằng cửa hàng</option>
+                <option value="Lương nhân sự">Lương nhân sự</option>
+                <option value="Bao bì & Vật tư">Bao bì & Vật tư</option>
+                <option value="Vận chuyển / Giao hàng">Vận chuyển / Giao hàng</option>
+                <option value="Chi phí khác">Chi phí khác</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Số Tiền (VNĐ)</label>
+              <input type="number" id="txnAmount" placeholder="Ví dụ: 1500000" min="0" required>
+            </div>
+            <div class="form-group">
+              <label>Hình Thức Thanh Toán</label>
+              <select id="txnPayment">
+                <option value="Tiền mặt">Tiền mặt tại quầy</option>
+                <option value="Chuyển khoản (VietQR)">Chuyển khoản ngân hàng (VietQR)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Đối Tác / Khách Hàng</label>
+              <input type="text" id="txnParty" placeholder="Ví dụ: Đại lý Chay An Lạc">
+            </div>
+            <div class="form-group form-full">
+              <label>Ghi Chú Chi Tiết</label>
+              <textarea id="txnNote" rows="2" placeholder="Chi tiết giao dịch, số hóa đơn, chuyến hàng..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-modal-close">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu Giao Dịch</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: SỬA SẢN PHẨM ================= -->
+  <div id="modalEditProduct" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Chỉnh Sửa Thông Tin & Giá Vốn Sản Phẩm</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <form id="formEditProduct">
+        <input type="hidden" id="editProdId">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label>Tên Sản Phẩm</label>
+              <input type="text" id="editProdName" required>
+            </div>
+            <div class="form-group">
+              <label>Nhóm Sản Phẩm</label>
+              <select id="editProdCategory" required>
+                <option value="SẢN PHẨM ĐÓNG LON">Sản Phẩm Đóng Lon</option>
+                <option value="SẢN PHẨM ĐÔNG LẠNH">Sản Phẩm Đông Lạnh</option>
+                <option value="SẢN PHẨM MÁT">Sản Phẩm Mát</option>
+                <option value="SẢN PHẨM KHÔ">Sản Phẩm Khô</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Quy Cách / Trọng Lượng</label>
+              <input type="text" id="editProdWeight" placeholder="Ví dụ: 200g/lon, Kg, 250g/vỉ">
+            </div>
+            <div class="form-group">
+              <label>Đơn Vị Tính (ĐVT)</label>
+              <input type="text" id="editProdUnit" required>
+            </div>
+            <div class="form-group">
+              <label>Đơn Giá Nhập Gốc (G) VNĐ</label>
+              <input type="number" id="editProdRawPrice" min="0" required>
+            </div>
+            <div class="form-group">
+              <label>Giá Bán Lẻ Thực Tế (VNĐ)</label>
+              <input type="number" id="editProdRetailActual" min="0" placeholder="Để trống nếu lấy theo giá đề xuất">
+            </div>
+            <div class="form-group">
+              <label>Số Lượng Tồn Kho Hiện Tại</label>
+              <input type="number" id="editProdInventory" min="0">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-modal-close">Đóng</button>
+          <button type="submit" class="btn btn-primary">Lưu Thay Đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: THÊM SẢN PHẨM MỚI ================= -->
+  <div id="modalAddProduct" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Thêm Sản Phẩm Mới Vào Danh Mục</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <form id="formAddProduct">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label>Tên Sản Phẩm Chay Mới</label>
+              <input type="text" id="addProdName" placeholder="Ví dụ: Chả chay nấm tuyết 300g" required>
+            </div>
+            <div class="form-group">
+              <label>Nhóm Sản Phẩm</label>
+              <select id="addProdCategory" required>
+                <option value="SẢN PHẨM ĐÓNG LON">Sản Phẩm Đóng Lon</option>
+                <option value="SẢN PHẨM ĐÔNG LẠNH" selected>Sản Phẩm Đông Lạnh</option>
+                <option value="SẢN PHẨM MÁT">Sản Phẩm Mát</option>
+                <option value="SẢN PHẨM KHÔ">Sản Phẩm Khô</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Quy Cách / Trọng Lượng</label>
+              <input type="text" id="addProdWeight" placeholder="Ví dụ: 300g/gói">
+            </div>
+            <div class="form-group">
+              <label>Đơn Vị Tính</label>
+              <input type="text" id="addProdUnit" value="Gói" required>
+            </div>
+            <div class="form-group">
+              <label>Đơn Giá Nhập Gốc (G) VNĐ</label>
+              <input type="number" id="addProdRawPrice" min="0" placeholder="Ví dụ: 35000" required>
+            </div>
+            <div class="form-group">
+              <label>Giá Bán Lẻ Dự Kiến</label>
+              <input type="number" id="addProdRetailActual" min="0" placeholder="Ví dụ: 50000">
+            </div>
+            <div class="form-group">
+              <label>Số Lượng Tồn Ban Đầu</label>
+              <input type="number" id="addProdInventory" value="0" min="0">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-modal-close">Hủy</button>
+          <button type="submit" class="btn btn-lotus">Thêm Vào Danh Mục</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/finance.js"></script>
+  <script>
+    // Khởi tạo ngày hôm nay cho modal
+    document.getElementById("txnDate").value = new Date().toISOString().slice(0, 10);
+  </script>
+</body>
+</html>
