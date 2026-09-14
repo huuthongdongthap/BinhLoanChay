@@ -1185,6 +1185,42 @@ class FinanceApp {
         p.wholesale_actual = p.raw_price > 0 ? Math.round(p.raw_price * 1.3) : 20000;
         shouldSyncProducts = true;
       }
+
+      // Quản lý Hạn Sử Dụng (HSD), Lô Sản Xuất & An toàn thực phẩm
+      if (!p.shelf_life_days) {
+        p.shelf_life_days = this.getShelfLifeDays(p.category);
+        shouldSyncProducts = true;
+      }
+      if (!p.batch_no) {
+        p.batch_no = "L2409-" + (p.id ? p.id.replace("BL-", "") : "01");
+        shouldSyncProducts = true;
+      }
+      if (!p.mfg_date || !p.expiry_date) {
+        const todayObj = new Date();
+        let mfgDaysAgo = 30;
+        if (p.id === "BL-028") {
+          // Sản phẩm demo hết hạn: Chả quế cây 500g (HSD 15 ngày, sản xuất 18 ngày trước -> quá date)
+          mfgDaysAgo = 18;
+        } else if (p.id === "BL-027") {
+          // Sản phẩm demo cận date: Chả lụa đòn lá chuối 500g (HSD 15 ngày, sản xuất 11 ngày trước -> còn 4 ngày)
+          mfgDaysAgo = 11;
+        } else if (p.id === "BL-010") {
+          // Sản phẩm demo cận date: Chả lụa nấm hương 300g (HSD 180 ngày, sản xuất 165 ngày trước -> còn 15 ngày)
+          mfgDaysAgo = 165;
+        } else if (p.category.includes("ĐÓNG LON")) {
+          mfgDaysAgo = 45;
+        } else if (p.category.includes("ĐÔNG LẠNH")) {
+          mfgDaysAgo = 30;
+        } else if (p.category.includes("MÁT")) {
+          mfgDaysAgo = 3;
+        } else {
+          mfgDaysAgo = 20;
+        }
+        const mfg = new Date(todayObj.getTime() - mfgDaysAgo * 24 * 60 * 60 * 1000);
+        p.mfg_date = mfg.toISOString().slice(0, 10);
+        p.expiry_date = this.calculateExpiryDate(p.mfg_date, p.shelf_life_days);
+        shouldSyncProducts = true;
+      }
     });
     if (shouldSyncProducts) {
       this.saveStorage("bl_products_v2", this.products);
@@ -1236,6 +1272,72 @@ class FinanceApp {
 
   formatNumber(num) {
     return new Intl.NumberFormat("vi-VN").format(Math.round(num || 0));
+  }
+
+  // ================= 0. CÁC HÀM XỬ LÝ DATE & AN TOÀN THỰC PHẨM (FEFO) =================
+  getShelfLifeDays(category) {
+    const cat = category || "";
+    if (cat.includes("ĐÓNG LON")) return 365; // Đóng lon: 12 tháng (365 ngày)
+    if (cat.includes("ĐÔNG LẠNH")) return 180; // Đông lạnh: 6 tháng (180 ngày)
+    if (cat.includes("MÁT")) return 15; // Mát: 15 ngày
+    if (cat.includes("KHÔ")) return 180; // Khô: 6 tháng (180 ngày)
+    return 180;
+  }
+
+  calculateExpiryDate(mfgDate, shelfLifeDays) {
+    if (!mfgDate) return "";
+    const days = Number(shelfLifeDays) || 180;
+    const d = new Date(mfgDate);
+    if (isNaN(d.getTime())) return "";
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+
+  getExpiryStatus(expiryDate) {
+    if (!expiryDate) {
+      return { status: "unknown", label: "Chưa rõ HSD", daysRemaining: 999, badgeClass: "badge-lon", color: "#64748b" };
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const exp = new Date(expiryDate);
+    exp.setHours(0, 0, 0, 0);
+    const diffTime = exp.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return {
+        status: "expired",
+        label: `Quá date ${Math.abs(diffDays)} ngày`,
+        daysRemaining: diffDays,
+        badgeClass: "badge-margin-danger",
+        color: "#dc2626"
+      };
+    } else if (diffDays <= 30) {
+      return {
+        status: "warning",
+        label: `Cận date (${diffDays} ngày)`,
+        daysRemaining: diffDays,
+        badgeClass: "badge-margin-warning",
+        color: "#b45309"
+      };
+    } else {
+      return {
+        status: "safe",
+        label: `Còn ${diffDays} ngày`,
+        daysRemaining: diffDays,
+        badgeClass: "badge-margin-good",
+        color: "#16a34a"
+      };
+    }
+  }
+
+  switchTabToExpiryAlert() {
+    this.switchTab("xnt");
+    const filterEl = document.getElementById("filterXntExpiry");
+    if (filterEl) {
+      filterEl.value = "warning";
+      this.renderInventoryXNTTable();
+    }
   }
 
   // ================= 1. ENGINE TÍNH GIÁ VỐN (COGS) =================
@@ -1374,6 +1476,35 @@ class FinanceApp {
         statusEl.textContent = `Khỏe mạnh (${m.cashRunwayDays} ngày an toàn)`;
       }
     }
+
+    // Kiểm tra an toàn thực phẩm & cảnh báo date
+    let expiredCount = 0;
+    let warningCount = 0;
+    this.products.forEach(p => {
+      if (Number(p.inventory_qty || 0) > 0) {
+        const st = this.getExpiryStatus(p.expiry_date).status;
+        if (st === "expired") expiredCount++;
+        else if (st === "warning") warningCount++;
+      }
+    });
+
+    const alertBanner = el("foodExpiryAlertBanner");
+    if (alertBanner) {
+      if (expiredCount > 0 || warningCount > 0) {
+        alertBanner.style.display = "block";
+        const countBadge = el("badgeExpiryCount");
+        if (countBadge) {
+          countBadge.textContent = `${expiredCount + warningCount} mặt hàng`;
+          countBadge.className = expiredCount > 0 ? "badge badge-margin-danger" : "badge badge-margin-warning";
+        }
+        const summaryText = el("textExpiryAlertSummary");
+        if (summaryText) {
+          summaryText.innerHTML = `Kho đang có <strong style="color:#dc2626;">${expiredCount}</strong> món đã quá date (cần đổi trả/xuất hủy) và <strong style="color:#b45309;">${warningCount}</strong> món cận date ≤ 30 ngày (cần ưu tiên xuất bán theo chuẩn FEFO).`;
+        }
+      } else {
+        alertBanner.style.display = "none";
+      }
+    }
   }
 
   populateSelectOptions() {
@@ -1390,8 +1521,10 @@ class FinanceApp {
       prodSelect.innerHTML = `<option value="">-- Chọn sản phẩm chay --</option>` +
         this.products.map(p => {
           const c = this.calcProductCost(p);
-          return `<option value="${p.id}" data-unit="${p.unit}" data-retail="${c.retailActual}" data-wholesale="${c.wholesaleActual}" data-cost="${c.costPrice}">
-            ${p.name} [Tồn: ${p.inventory_qty || 0} ${p.unit}] - Lẻ: ${this.formatNumber(c.retailActual)}đ | Sỉ: ${this.formatNumber(c.wholesaleActual)}đ
+          const exp = this.getExpiryStatus(p.expiry_date);
+          const expTag = exp.status === "expired" ? " [🔴 HẾT HẠN]" : (exp.status === "warning" ? ` [⚠️ Cận date: ${exp.daysRemaining}d]` : ` [HSD: ${p.expiry_date || "Chuẩn"}]`);
+          return `<option value="${p.id}" data-unit="${p.unit}" data-retail="${c.retailActual}" data-wholesale="${c.wholesaleActual}" data-cost="${c.costPrice}" data-expiry="${p.expiry_date || ""}" data-batch="${p.batch_no || ""}">
+            ${p.name}${expTag} [Tồn: ${p.inventory_qty || 0} ${p.unit}] - Lẻ: ${this.formatNumber(c.retailActual)}đ | Sỉ: ${this.formatNumber(c.wholesaleActual)}đ
           </option>`;
         }).join("");
     }
@@ -1400,7 +1533,7 @@ class FinanceApp {
     const stockInSelect = document.getElementById("stockInProductId");
     if (stockInSelect) {
       stockInSelect.innerHTML = `<option value="">-- Chọn sản phẩm cần nhập --</option>` +
-        this.products.map(p => `<option value="${p.id}" data-cost="${p.raw_price || 0}">${p.name} (${p.unit})</option>`).join("");
+        this.products.map(p => `<option value="${p.id}" data-cost="${p.raw_price || 0}" data-shelf="${p.shelf_life_days || 180}" data-cat="${p.category}">${p.name} (${p.unit}) - [HSD chuẩn: ${p.shelf_life_days || 180} ngày]</option>`).join("");
     }
   }
 
@@ -1533,6 +1666,13 @@ class FinanceApp {
     const p = this.products.find(item => item.id === productId);
     if (!p) return;
 
+    const exp = this.getExpiryStatus(p.expiry_date);
+    if (exp.status === "expired" && typeof confirm !== "undefined") {
+      if (!confirm(`⚠️ CẢNH BÁO AN TOÀN THỰC PHẨM:\nSản phẩm "${p.name}" (Số Lô: ${p.batch_no || "N/A"}) đã quá hạn sử dụng (${p.expiry_date}) ${Math.abs(exp.daysRemaining)} ngày!\nBạn có chắc chắn muốn xuất bán món này không?`)) {
+        return;
+      }
+    }
+
     const calc = this.calcProductCost(p);
     const orderType = (typeof document !== "undefined" && document.getElementById("orderType")) ? document.getElementById("orderType").value : "retail";
     let unitPrice = orderType === "wholesale" ? calc.wholesaleActual : calc.retailActual;
@@ -1550,6 +1690,8 @@ class FinanceApp {
       this.posCart.push({
         product_id: p.id,
         product_name: p.name,
+        batch_no: p.batch_no || "",
+        expiry_date: p.expiry_date || "",
         unit: p.unit,
         qty: qty,
         price: unitPrice,
@@ -1583,10 +1725,13 @@ class FinanceApp {
 
     const customId = "CUSTOM-" + Date.now();
     const estimatedCost = Math.round(price * 0.7);
+    const todayStr = new Date().toISOString().slice(0, 10);
 
     this.posCart.push({
       product_id: customId,
       product_name: name,
+      batch_no: "LÔ-TỰ-CHỌN",
+      expiry_date: this.calculateExpiryDate(todayStr, 15),
       unit: unit,
       qty: qty,
       price: price,
@@ -1651,6 +1796,7 @@ class FinanceApp {
         <td>
           <strong>${item.product_name}</strong>
           ${item.product_id.startsWith("CUSTOM-") ? `<span class="badge" style="background:#fef3c7; color:#b45309; font-size: 9px; margin-left: 4px;">Món mới</span>` : ""}
+          ${item.expiry_date ? `<div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Lô: <strong style="color:var(--primary);">${item.batch_no || "---"}</strong> | HSD: <strong>${item.expiry_date}</strong></div>` : ""}
         </td>
         <td style="color: var(--text-muted);">${item.unit}</td>
         <td style="text-align: center;">
@@ -1760,6 +1906,8 @@ class FinanceApp {
           type: "out_sale",
           product_id: p.id,
           product_name: p.name,
+          batch_no: item.batch_no || p.batch_no || "",
+          expiry_date: item.expiry_date || p.expiry_date || "",
           qty: item.qty,
           unit: p.unit,
           unit_cost: item.cost,
@@ -1865,6 +2013,7 @@ class FinanceApp {
       <tr>
         <td>${idx + 1}</td>
         <td><strong>${item.product_name}</strong></td>
+        <td style="font-size: 11px; color: var(--text-muted);">${item.batch_no || "Lô chuẩn"} / ${item.expiry_date || "HSD chuẩn"}</td>
         <td>${item.unit}</td>
         <td style="text-align: center;">${item.qty}</td>
         <td style="text-align: right;">${this.formatNumber(item.price)} đ</td>
@@ -1887,11 +2036,27 @@ class FinanceApp {
     if (!tbody) return;
 
     const catFilter = document.getElementById("filterXntCat") ? document.getElementById("filterXntCat").value : "all";
+    const expiryFilter = document.getElementById("filterXntExpiry") ? document.getElementById("filterXntExpiry").value : "all";
     const search = document.getElementById("searchXnt") ? document.getElementById("searchXnt").value.toLowerCase() : "";
 
     let list = this.products;
     if (catFilter !== "all") list = list.filter(p => p.category === catFilter);
-    if (search) list = list.filter(p => p.name.toLowerCase().includes(search));
+    if (expiryFilter !== "all") {
+      list = list.filter(p => {
+        const exp = this.getExpiryStatus(p.expiry_date);
+        if (expiryFilter === "warning") return exp.status === "warning";
+        if (expiryFilter === "expired") return exp.status === "expired";
+        if (expiryFilter === "safe") return exp.status === "safe";
+        return true;
+      });
+    }
+    if (search) {
+      list = list.filter(p => 
+        p.name.toLowerCase().includes(search) || 
+        (p.batch_no && p.batch_no.toLowerCase().includes(search)) || 
+        p.id.toLowerCase().includes(search)
+      );
+    }
 
     let totalOpening = 0;
     let totalIn = 0;
@@ -1906,6 +2071,7 @@ class FinanceApp {
       const outQty = Number(p.out_qty || 0);
       const closing = Number(p.inventory_qty || 0);
       const stockVal = closing * calc.costPrice;
+      const exp = this.getExpiryStatus(p.expiry_date);
 
       totalOpening += opening;
       totalIn += inQty;
@@ -1919,6 +2085,11 @@ class FinanceApp {
           <td><strong>${p.name}</strong></td>
           <td><span class="badge" style="background:#f1f5f9; color:#475569;">${p.category.replace("SẢN PHẨM ", "")}</span></td>
           <td>${p.unit}</td>
+          <td><span class="badge" style="background:#f8fafc; color:#334155; font-size: 11px; border: 1px solid #e2e8f0;">${p.batch_no || "L2409-01"}</span></td>
+          <td>
+            <div style="font-weight: 600; font-size: 11.5px;">${p.expiry_date || "---"}</div>
+            <span class="badge ${exp.badgeClass}" style="font-size: 10px; margin-top: 2px;">${exp.label}</span>
+          </td>
           <td style="text-align: center; color: var(--text-muted);">${opening}</td>
           <td style="text-align: center; color: var(--success); font-weight: 600;">+${inQty}</td>
           <td style="text-align: center; color: var(--danger); font-weight: 600;">-${outQty}</td>
@@ -1951,6 +2122,9 @@ class FinanceApp {
 
     p.inventory_qty = Number(p.inventory_qty || 0) + qty;
     p.in_qty = Number(p.in_qty || 0) + qty;
+    if (formData.batch_no) p.batch_no = formData.batch_no;
+    if (formData.mfg_date) p.mfg_date = formData.mfg_date;
+    if (formData.expiry_date) p.expiry_date = formData.expiry_date;
 
     this.stockMovements.unshift({
       id: "MOV-" + Date.now(),
@@ -1958,6 +2132,9 @@ class FinanceApp {
       type: "in",
       product_id: p.id,
       product_name: p.name,
+      batch_no: formData.batch_no || p.batch_no || "",
+      mfg_date: formData.mfg_date || p.mfg_date || "",
+      expiry_date: formData.expiry_date || p.expiry_date || "",
       qty,
       unit: p.unit,
       unit_cost: unitPrice,
@@ -1975,7 +2152,7 @@ class FinanceApp {
         category: "Nhập nguyên liệu / Giá vốn",
         amount: totalCost,
         payment: formData.payment || "Chuyển khoản (VietQR)",
-        note: `Nhập ${qty} ${p.unit} ${p.name}`,
+        note: `Nhập ${qty} ${p.unit} ${p.name} [Lô: ${p.batch_no || "N/A"}]`,
         party: formData.supplier || "Xưởng Bình Loan"
       });
     }
@@ -1992,6 +2169,10 @@ class FinanceApp {
     const p = this.products.find(item => item.id === productId);
     if (!p) return;
 
+    const today = new Date().toISOString().slice(0, 10);
+    const shelfDays = p.shelf_life_days || this.getShelfLifeDays(p.category);
+    const calculatedExpiry = this.calculateExpiryDate(today, shelfDays);
+
     const el = id => document.getElementById(id);
     if (el("quickStockProdId")) el("quickStockProdId").value = p.id;
     if (el("quickStockProdName")) el("quickStockProdName").textContent = p.name;
@@ -1999,6 +2180,9 @@ class FinanceApp {
     if (el("quickStockProdCurrent")) el("quickStockProdCurrent").textContent = `${p.inventory_qty || 0} ${p.unit}`;
     if (el("quickStockPrice")) el("quickStockPrice").value = p.raw_price || 0;
     if (el("quickStockQty")) el("quickStockQty").value = 20;
+    if (el("quickStockBatch")) el("quickStockBatch").value = "L" + today.slice(2, 7).replace("-", "") + "-" + p.id.replace("BL-", "");
+    if (el("quickStockMfgDate")) el("quickStockMfgDate").value = today;
+    if (el("quickStockExpiryDate")) el("quickStockExpiryDate").value = calculatedExpiry;
 
     this.openModal("modalQuickStockIn");
   }
@@ -2014,6 +2198,9 @@ class FinanceApp {
 
     p.inventory_qty = Number(p.inventory_qty || 0) + qty;
     p.in_qty = Number(p.in_qty || 0) + qty;
+    if (formData.batch) p.batch_no = formData.batch;
+    if (formData.mfgDate) p.mfg_date = formData.mfgDate;
+    if (formData.expiryDate) p.expiry_date = formData.expiryDate;
 
     this.stockMovements.unshift({
       id: "MOV-" + Date.now(),
@@ -2021,11 +2208,14 @@ class FinanceApp {
       type: "in",
       product_id: p.id,
       product_name: p.name,
+      batch_no: formData.batch || p.batch_no || "",
+      mfg_date: formData.mfgDate || p.mfg_date || "",
+      expiry_date: formData.expiryDate || p.expiry_date || "",
       qty,
       unit: p.unit,
       unit_cost: price,
       total_cost: totalCost,
-      note: `Nhập kho nhanh: ${qty} ${p.unit} ${p.name}`,
+      note: `Nhập kho nhanh: ${qty} ${p.unit} ${p.name} [Lô: ${p.batch_no || "N/A"}]`,
       ref: "PNK-NHANH-" + Date.now().toString().slice(-4)
     });
 
@@ -2559,12 +2749,13 @@ class FinanceApp {
       });
       this.downloadFile("Danh_Sach_Don_Hang_Binh_Loan.csv", csv);
     } else if (type === "xnt") {
-      csv = `﻿Mã SP,Tên Sản Phẩm,Nhóm,ĐVT,Tồn Đầu Kỳ,Nhập Trong Kỳ,Xuất Trong Kỳ,Tồn Cuối Kỳ,Giá Cost,Tổng Vốn Tồn Kho (VND)
+      csv = `﻿Mã SP,Tên Sản Phẩm,Nhóm,Số Lô,Hạn Sử Dụng,Tình Trạng HSD,ĐVT,Tồn Đầu Kỳ,Nhập Trong Kỳ,Xuất Trong Kỳ,Tồn Cuối Kỳ,Giá Cost,Tổng Vốn Tồn Kho (VND)
 `;
       this.products.forEach(p => {
         const c = this.calcProductCost(p);
         const closing = Number(p.inventory_qty || 0);
-        csv += `"${p.id}","${p.name}","${p.category}","${p.unit}","${p.opening_qty || 0}","${p.in_qty || 0}","${p.out_qty || 0}","${closing}","${c.costPrice}","${closing * c.costPrice}"
+        const exp = this.getExpiryStatus(p.expiry_date);
+        csv += `"${p.id}","${p.name}","${p.category}","${p.batch_no || ""}","${p.expiry_date || ""}","${exp.label}","${p.unit}","${p.opening_qty || 0}","${p.in_qty || 0}","${p.out_qty || 0}","${closing}","${c.costPrice}","${closing * c.costPrice}"
 `;
       });
       this.downloadFile("Bao_Cao_Xuat_Nhap_Ton_Binh_Loan.csv", csv);
@@ -2724,6 +2915,11 @@ class FinanceApp {
     const retailActual = Number(formData.retail_actual) || (retailSug > 0 ? retailSug : 0);
     const wholesaleActual = Number(formData.wholesale_actual) || (wholesaleSug > 0 ? wholesaleSug : 0);
 
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const shelfDays = Number(formData.shelf_life_days) || this.getShelfLifeDays(cat);
+    const batchNo = formData.batch_no || ("L" + todayStr.slice(2, 7).replace("-", "") + "-" + newId.replace("BL-", ""));
+    const expiryDate = formData.expiry_date || this.calculateExpiryDate(todayStr, shelfDays);
+
     const newProd = {
       id: newId,
       category: cat,
@@ -2741,7 +2937,11 @@ class FinanceApp {
       inventory_qty: initialQty,
       opening_qty: initialQty,
       in_qty: 0,
-      out_qty: 0
+      out_qty: 0,
+      shelf_life_days: shelfDays,
+      batch_no: batchNo,
+      mfg_date: todayStr,
+      expiry_date: expiryDate
     };
 
     this.products.push(newProd);
@@ -2757,6 +2957,8 @@ class FinanceApp {
       this.posCart.push({
         product_id: newId,
         product_name: newProd.name,
+        batch_no: newProd.batch_no,
+        expiry_date: newProd.expiry_date,
         unit: newProd.unit,
         qty: 1,
         price: unitPrice,
@@ -2816,9 +3018,27 @@ class FinanceApp {
           raw_price: document.getElementById("addProdRawPrice").value,
           retail_actual: document.getElementById("addProdRetailActual").value,
           wholesale_actual: document.getElementById("addProdWholesaleActual").value,
-          inventory_qty: document.getElementById("addProdInventory").value
+          inventory_qty: document.getElementById("addProdInventory").value,
+          shelf_life_days: document.getElementById("addProdShelfLife") ? document.getElementById("addProdShelfLife").value : 180,
+          batch_no: document.getElementById("addProdBatch") ? document.getElementById("addProdBatch").value : "",
+          expiry_date: document.getElementById("addProdExpiryDate") ? document.getElementById("addProdExpiryDate").value : ""
         });
         formAddProd.reset();
+      });
+    }
+
+    // Khi đổi nhóm sản phẩm lúc thêm món mới: Tự động đổi số ngày bảo quản
+    const addCatSelect = document.getElementById("addProdCategory");
+    if (addCatSelect) {
+      addCatSelect.addEventListener("change", () => {
+        const shelfInput = document.getElementById("addProdShelfLife");
+        const expInput = document.getElementById("addProdExpiryDate");
+        const days = this.getShelfLifeDays(addCatSelect.value);
+        if (shelfInput) shelfInput.value = days;
+        if (expInput) {
+          const today = new Date().toISOString().slice(0, 10);
+          expInput.value = this.calculateExpiryDate(today, days);
+        }
       });
     }
 
@@ -2853,14 +3073,52 @@ class FinanceApp {
       });
     }
 
-    // Form Add Stock In
+    // Form Add Stock In & Auto calculate Expiry
     const stockInSelect = document.getElementById("stockInProductId");
     if (stockInSelect) {
       stockInSelect.addEventListener("change", () => {
         const prod = this.products.find(p => p.id === stockInSelect.value);
         const priceInput = document.getElementById("stockInPrice");
-        if (prod && priceInput) {
-          priceInput.value = prod.raw_price || 0;
+        const mfgInput = document.getElementById("stockInMfgDate");
+        const expInput = document.getElementById("stockInExpiryDate");
+        const batchInput = document.getElementById("stockInBatch");
+        const hintEl = document.getElementById("stockInShelfLifeHint");
+
+        if (prod) {
+          if (priceInput) priceInput.value = prod.raw_price || 0;
+          const shelf = prod.shelf_life_days || this.getShelfLifeDays(prod.category);
+          if (hintEl) hintEl.textContent = `${prod.category.replace("SẢN PHẨM ", "")}: ${shelf} ngày`;
+          const today = new Date().toISOString().slice(0, 10);
+          if (mfgInput && !mfgInput.value) mfgInput.value = today;
+          const mfgVal = (mfgInput && mfgInput.value) ? mfgInput.value : today;
+          if (expInput) expInput.value = this.calculateExpiryDate(mfgVal, shelf);
+          if (batchInput && !batchInput.value) batchInput.value = "L" + today.slice(2, 7).replace("-", "") + "-" + prod.id.replace("BL-", "");
+        }
+      });
+    }
+
+    const stockInMfgDate = document.getElementById("stockInMfgDate");
+    if (stockInMfgDate) {
+      stockInMfgDate.addEventListener("change", () => {
+        const prodId = document.getElementById("stockInProductId") ? document.getElementById("stockInProductId").value : "";
+        const prod = this.products.find(p => p.id === prodId);
+        const shelf = prod ? (prod.shelf_life_days || this.getShelfLifeDays(prod.category)) : 180;
+        const expInput = document.getElementById("stockInExpiryDate");
+        if (expInput && stockInMfgDate.value) {
+          expInput.value = this.calculateExpiryDate(stockInMfgDate.value, shelf);
+        }
+      });
+    }
+
+    const quickStockMfgDate = document.getElementById("quickStockMfgDate");
+    if (quickStockMfgDate) {
+      quickStockMfgDate.addEventListener("change", () => {
+        const prodId = document.getElementById("quickStockProdId") ? document.getElementById("quickStockProdId").value : "";
+        const prod = this.products.find(p => p.id === prodId);
+        const shelf = prod ? (prod.shelf_life_days || this.getShelfLifeDays(prod.category)) : 180;
+        const expInput = document.getElementById("quickStockExpiryDate");
+        if (expInput && quickStockMfgDate.value) {
+          expInput.value = this.calculateExpiryDate(quickStockMfgDate.value, shelf);
         }
       });
     }
@@ -2874,6 +3132,9 @@ class FinanceApp {
           qty: document.getElementById("stockInQty").value,
           price: document.getElementById("stockInPrice").value,
           date: document.getElementById("stockInDate").value,
+          batch_no: document.getElementById("stockInBatch") ? document.getElementById("stockInBatch").value : "",
+          mfg_date: document.getElementById("stockInMfgDate") ? document.getElementById("stockInMfgDate").value : "",
+          expiry_date: document.getElementById("stockInExpiryDate") ? document.getElementById("stockInExpiryDate").value : "",
           supplier: document.getElementById("stockInSupplier").value,
           note: document.getElementById("stockInNote").value,
           create_expense: document.getElementById("stockInCreateExpense").checked,
@@ -2920,6 +3181,9 @@ class FinanceApp {
           productId: document.getElementById("quickStockProdId").value,
           qty: document.getElementById("quickStockQty").value,
           price: document.getElementById("quickStockPrice").value,
+          batch: document.getElementById("quickStockBatch") ? document.getElementById("quickStockBatch").value : "",
+          mfgDate: document.getElementById("quickStockMfgDate") ? document.getElementById("quickStockMfgDate").value : "",
+          expiryDate: document.getElementById("quickStockExpiryDate") ? document.getElementById("quickStockExpiryDate").value : "",
           createExpense: document.getElementById("quickStockCreateExpense").checked
         });
       });
@@ -3033,6 +3297,7 @@ class FinanceApp {
     elBind("filterOrderPayment", "change", () => this.renderOrdersTable());
     elBind("searchXnt", "input", () => this.renderInventoryXNTTable());
     elBind("filterXntCat", "change", () => this.renderInventoryXNTTable());
+    elBind("filterXntExpiry", "change", () => this.renderInventoryXNTTable());
     elBind("searchCogs", "input", () => this.renderCOGSTable());
     elBind("filterCogsCat", "change", () => this.renderCOGSTable());
     elBind("searchCustomer", "input", () => this.renderCustomersTable());

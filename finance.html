@@ -145,6 +145,27 @@
         </div>
       </div>
 
+      <!-- Food Safety & Expiry Alert Widget -->
+      <div id="foodExpiryAlertBanner" class="panel-card" style="display: none; background: linear-gradient(135deg, #fffbeb, #fef2f2); border-left: 4px solid var(--accent-gold); margin-bottom: 20px; padding: 14px 18px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 28px;">⚠️</span>
+            <div>
+              <div style="font-weight: 700; color: #9a3412; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                <span>CẢNH BÁO AN TOÀN THỰC PHẨM & HẠN SỬ DỤNG (HSD)</span>
+                <span id="badgeExpiryCount" class="badge badge-margin-danger" style="font-size: 11px;">0 món</span>
+              </div>
+              <div style="font-size: 12.5px; color: #78350f; margin-top: 3px;" id="textExpiryAlertSummary">
+                Phát hiện hàng hóa trong kho cận date (≤ 30 ngày) hoặc đã hết hạn cần xử lý gấp.
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-lotus" style="font-size: 12px; padding: 6px 14px;" onclick="app.switchTabToExpiryAlert()">
+            🔍 Kiểm Tra Kho Hàng Ngay
+          </button>
+        </div>
+      </div>
+
       <!-- Charts Section -->
       <div class="charts-grid">
         <div class="panel-card">
@@ -295,7 +316,13 @@
               <option value="SẢN PHẨM MÁT">Sản Phẩm Mát (3 món)</option>
               <option value="SẢN PHẨM KHÔ">Sản Phẩm Khô (12 món)</option>
             </select>
-            <input type="text" id="searchXnt" class="search-input" placeholder="Tìm tên món chay trong kho...">
+            <select id="filterXntExpiry" class="select-filter" style="border-color: #f59e0b; background: #fffbeb; font-weight: 600; color: #92400e;">
+              <option value="all">📅 Tất cả Hạn Dùng (HSD)</option>
+              <option value="warning">⚠️ Cận Date (≤ 30 ngày)</option>
+              <option value="expired">🔴 Đã Hết Hạn</option>
+              <option value="safe">🟢 Còn Hạn An Toàn (> 30 ngày)</option>
+            </select>
+            <input type="text" id="searchXnt" class="search-input" placeholder="Tìm tên món chay hoặc số lô...">
           </div>
           <span style="font-size: 12px; color: var(--text-muted);">Công thức: Tồn Cuối = Tồn Đầu + Nhập - Xuất</span>
         </div>
@@ -308,6 +335,8 @@
                 <th>Tên Mặt Hàng</th>
                 <th>Nhóm</th>
                 <th>ĐVT</th>
+                <th>Số Lô (Lot)</th>
+                <th>Hạn Sử Dụng (HSD)</th>
                 <th style="text-align: center;">Tồn Đầu</th>
                 <th style="text-align: center; color: var(--success);">Nhập (+)</th>
                 <th style="text-align: center; color: var(--danger);">Xuất (-)</th>
@@ -744,6 +773,7 @@
               <tr>
                 <th style="width: 30px;">#</th>
                 <th>Tên Món</th>
+                <th>Số Lô / HSD</th>
                 <th>ĐVT</th>
                 <th style="text-align: center;">SL</th>
                 <th style="text-align: right;">Đơn Giá</th>
@@ -819,8 +849,23 @@
               <input type="number" id="stockInPrice" min="0" placeholder="Giá nhập gốc" required>
             </div>
             <div class="form-group">
+              <label>Số Lô Sản Xuất (Lot No.)</label>
+              <input type="text" id="stockInBatch" placeholder="Ví dụ: L2409-BL01">
+            </div>
+            <div class="form-group">
+              <label>Ngày Sản Xuất (NSX)</label>
+              <input type="date" id="stockInMfgDate">
+            </div>
+            <div class="form-group">
+              <label style="color: #b45309; font-weight: 700;">Hạn Sử Dụng (HSD) *</label>
+              <input type="date" id="stockInExpiryDate" required style="border-color: #f59e0b; background: #fffbeb; font-weight: 600;">
+            </div>
+            <div class="form-group">
               <label>Ngày Nhập Kho</label>
               <input type="date" id="stockInDate" required>
+            </div>
+            <div class="form-group form-full" style="background: #f0fdf4; border: 1px dashed var(--primary); border-radius: 6px; padding: 8px 12px; font-size: 11.5px; color: #166534;">
+              🌿 Tiêu chuẩn bảo quản: <strong id="stockInShelfLifeHint">Đông Lạnh: 180 ngày</strong>. Tự động tính HSD theo NSX & nhóm mặt hàng.
             </div>
             <div class="form-group">
               <label>Nhà Cung Cấp / Xưởng</label>
@@ -1057,6 +1102,18 @@
               <label>Số Lượng Tồn Kho Ban Đầu</label>
               <input type="number" id="addProdInventory" value="0" min="0">
             </div>
+            <div class="form-group">
+              <label>Thời Hạn Bảo Quản (Ngày)</label>
+              <input type="number" id="addProdShelfLife" value="180" min="1" placeholder="Số ngày bảo quản" required>
+            </div>
+            <div class="form-group">
+              <label>Số Lô Sản Xuất Ban Đầu</label>
+              <input type="text" id="addProdBatch" placeholder="Ví dụ: L2409-01">
+            </div>
+            <div class="form-group">
+              <label style="color: #b45309; font-weight: 600;">Hạn Sử Dụng (HSD) Ban Đầu</label>
+              <input type="date" id="addProdExpiryDate" style="border-color: #f59e0b; background: #fffbeb;">
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -1086,13 +1143,25 @@
             </div>
           </div>
           <div class="form-grid">
-            <div class="form-group form-full">
+            <div class="form-group">
               <label>Số Lượng Nhập Thêm</label>
               <input type="number" id="quickStockQty" value="20" min="1" required style="font-size: 16px; font-weight: 700; color: var(--primary);">
             </div>
-            <div class="form-group form-full">
+            <div class="form-group">
               <label>Đơn Giá Nhập Gốc (VNĐ)</label>
               <input type="number" id="quickStockPrice" min="0" required>
+            </div>
+            <div class="form-group">
+              <label>Số Lô (Lot No.)</label>
+              <input type="text" id="quickStockBatch" placeholder="Ví dụ: L2409-Q01">
+            </div>
+            <div class="form-group">
+              <label>Ngày Sản Xuất (NSX)</label>
+              <input type="date" id="quickStockMfgDate">
+            </div>
+            <div class="form-group form-full">
+              <label style="color: #b45309; font-weight: 700;">Hạn Sử Dụng (HSD) *</label>
+              <input type="date" id="quickStockExpiryDate" required style="border-color: #f59e0b; background: #fffbeb; font-weight: 600;">
             </div>
             <div class="form-group form-full" style="flex-direction: row; align-items: center; gap: 8px;">
               <input type="checkbox" id="quickStockCreateExpense" checked style="width: 18px; height: 18px;">
